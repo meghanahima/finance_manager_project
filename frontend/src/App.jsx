@@ -1,19 +1,17 @@
-import React from 'react'
-import './App.css'
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
-import { Hello } from './components/hello'
-import Home from './components/Home'
+import React from 'react';
+import "./App.css";
 
-function App() {
-  return (
-    <>
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import LoginPage from './components/loginComponents/loginPage';
+
+function App(){
+    return (
       <Router>
         <Routes>
-          <Route path="/" element={<Home />}></Route>
+          <Route path="/login" element={<LoginPage/>}/>
         </Routes>
       </Router>
-    </>
-  )
+    )
 }
 
-export default App
+export default App;
