@@ -1,4 +1,5 @@
 const processRequest = (err, data, res) =>{
+    // error(bad request)
     if (err){
         return res
         .status(400)
@@ -7,6 +8,8 @@ const processRequest = (err, data, res) =>{
             message: err?.message ? err.message : "Something went wrong"
         });
     }
+
+    // data not found
     if (!data){
         return res
         .status(404)
@@ -15,6 +18,8 @@ const processRequest = (err, data, res) =>{
             message: "Data not found"
         });
     }
+
+    // success processing request
     return res
     .status(200)
     .json({
