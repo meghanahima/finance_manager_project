@@ -13,13 +13,45 @@ import Card, {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../utilities/card";
+} from "../utilities/card";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    const url = isLogin
+      ? "http://localhost:5000/api/user/login"
+      : "http://localhost:5000/api/user/register";
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mail: email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Something went wrong");
+      setSuccess(isLogin ? "Login successful!" : "Registration successful!");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -45,8 +77,8 @@ const LoginPage = () => {
             </CardTitle>
             <CardDescription>
               {isLogin
-                ?"Enter your credentials to access your dashboard"
-                :"Fill in your details to create a new account"}
+                ? "Enter your credentials to access your dashboard"
+                : "Fill in your details to create a new account"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -85,7 +117,7 @@ const LoginPage = () => {
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     id="password"
-                    type={showPassword?"text":"password"}
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => {
@@ -99,11 +131,7 @@ const LoginPage = () => {
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 text-gray-400 px-3"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword?(
-                        <EyeOff className=""/>
-                    ):(
-                        <Eye/>
-                    )}
+                    {showPassword ? <EyeOff className="" /> : <Eye />}
                   </button>
                 </div>
                 {isLogin && (
@@ -118,11 +146,20 @@ const LoginPage = () => {
                 )}
               </div>
 
+              {error && (
+                <div className="text-red-500 text-sm mb-2">{error}</div>
+              )}
+              {success && (
+                <div className="text-green-600 text-sm mb-2">{success}</div>
+              )}
+
               <button
                 type="submit"
+                onClick={handleLogin}
+                disabled={loading}
                 className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-lime-500 rounded-lg text-white font-semibold mt-6 hover:from-teal-600 hover:to-lime-600 transition-colors"
               >
-                {isLogin ? "Sign In ->" : "Sign Up ->"}
+                {loading ? "Loading..." : isLogin ? "Sign In ->" : "Sign Up ->"}
               </button>
 
               <div className="flex items-center my-4">

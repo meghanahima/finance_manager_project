@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 const register = async (req, res) => {
-  let { mail, userName, password } = req.body;
+  let { mail, password } = req.body;
   try {
     // mail already exists
     const existingUser = await User.findOne({ mail });
@@ -23,7 +23,6 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newUser = await User.create({
-      userName,
       mail,
       password: hashedPassword,
     });

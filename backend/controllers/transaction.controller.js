@@ -9,7 +9,7 @@ const addTransaction = async (req, res) => {
     amount,
     description,
     dateOfTransaction,
-    uploadedReceiptLink,
+    // uploadedReceiptLink,
   } = req.body;
 
   try {
@@ -20,7 +20,7 @@ const addTransaction = async (req, res) => {
       amount,
       description: description || null,
       dateOfTransaction,
-      uploadedReceiptLink: uploadedReceiptLink || null,
+    //   uploadedReceiptLink: uploadedReceiptLink || null,
     });
 
     return processRequest(null, newTransaction, res);
