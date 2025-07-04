@@ -178,6 +178,18 @@ const dashboardMetrics = async (req, res) => {
       if (t.type === "Expense")
         incomeExpenseData[m].expense += Math.abs(t.amount);
     });
+    // Yearly income/expense
+    const yearlyMap = {};
+    all.forEach((t) => {
+      const d = new Date(t.dateOfTransaction);
+      const y = d.getFullYear();
+      if (!yearlyMap[y]) yearlyMap[y] = { year: y, income: 0, expense: 0 };
+      if (t.type === "Income") yearlyMap[y].income += t.amount;
+      if (t.type === "Expense") yearlyMap[y].expense += Math.abs(t.amount);
+    });
+    const yearlyIncomeExpenseData = Object.values(yearlyMap).sort(
+      (a, b) => a.year - b.year
+    );
     // Category breakdown
     const categoryMap = {};
     all.forEach((t) => {
@@ -187,15 +199,31 @@ const dashboardMetrics = async (req, res) => {
     const expenseCategories = Object.entries(categoryMap).map(
       ([name, value]) => ({ name, value })
     );
-    // Weekly trends (mock for now)
-    const weeklyTrends = [
-      { week: "Week 1", expense: 600, income: 900, savings: 300 },
-      { week: "Week 2", expense: 650, income: 950, savings: 300 },
-      { week: "Week 3", expense: 670, income: 1200, savings: 530 },
-      { week: "Week 4", expense: 680, income: 1000, savings: 320 },
-      { week: "Week 5", expense: 690, income: 1100, savings: 410 },
-      { week: "Week 6", expense: 700, income: 1150, savings: 450 },
-    ];
+    // Weekly trends (real data)
+    const getWeek = (date) => {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+      const yearStart = new Date(d.getFullYear(), 0, 1);
+      const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+      return `Week ${weekNo}`;
+    };
+    const weekMap = {};
+    all.forEach((t) => {
+      const week = getWeek(t.dateOfTransaction);
+      if (!weekMap[week])
+        weekMap[week] = { week, expense: 0, income: 0, savings: 0 };
+      if (t.type === "Income") weekMap[week].income += t.amount;
+      if (t.type === "Expense") weekMap[week].expense += Math.abs(t.amount);
+    });
+    Object.values(weekMap).forEach((w) => {
+      w.savings = w.income - w.expense;
+    });
+    const weeklyTrends = Object.values(weekMap).sort((a, b) => {
+      const aNum = parseInt(a.week.replace(/\D/g, ""));
+      const bNum = parseInt(b.week.replace(/\D/g, ""));
+      return aNum - bNum;
+    });
     return processRequest(
       null,
       {
@@ -203,6 +231,7 @@ const dashboardMetrics = async (req, res) => {
         totalExpenses,
         netSavings,
         incomeExpenseData,
+        yearlyIncomeExpenseData,
         expenseCategories,
         weeklyTrends,
       },

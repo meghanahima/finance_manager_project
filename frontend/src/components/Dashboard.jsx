@@ -35,6 +35,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activePieIndex, setActivePieIndex] = useState(null);
+  const [incomeExpenseView, setIncomeExpenseView] = useState("monthly");
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -68,62 +69,136 @@ const Dashboard = () => {
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
   if (!metrics) return null;
 
-  const lastMonthIdx = new Date().getMonth() - 1;
-  const thisMonthIdx = new Date().getMonth();
-  const prevIncome = metrics.incomeExpenseData?.[lastMonthIdx]?.income || 0;
-  const currIncome = metrics.incomeExpenseData?.[thisMonthIdx]?.income || 0;
-  const prevExpense = metrics.incomeExpenseData?.[lastMonthIdx]?.expense || 0;
-  const currExpense = metrics.incomeExpenseData?.[thisMonthIdx]?.expense || 0;
-  const incomeChange = prevIncome
-    ? (((currIncome - prevIncome) / prevIncome) * 100).toFixed(1)
-    : null;
-  const expenseChange = prevExpense
-    ? (((currExpense - prevExpense) / prevExpense) * 100).toFixed(1)
-    : null;
+  const incomeExpenseData =
+    incomeExpenseView === "monthly"
+      ? metrics.incomeExpenseData
+      : metrics.yearlyIncomeExpenseData;
+  let prevNet = null,
+    currNet = null;
+  if (incomeExpenseView === "monthly") {
+    const lastMonthIdx = new Date().getMonth() - 1;
+    const thisMonthIdx = new Date().getMonth();
+    prevNet =
+      (metrics.incomeExpenseData?.[lastMonthIdx]?.income || 0) -
+      (metrics.incomeExpenseData?.[lastMonthIdx]?.expense || 0);
+    currNet =
+      (metrics.incomeExpenseData?.[thisMonthIdx]?.income || 0) -
+      (metrics.incomeExpenseData?.[thisMonthIdx]?.expense || 0);
+  } else {
+    const years = metrics.yearlyIncomeExpenseData.map((y) => y.year);
+    const lastYear = years[years.length - 2];
+    const thisYear = years[years.length - 1];
+    prevNet =
+      metrics.yearlyIncomeExpenseData.find((y) => y.year === lastYear)?.income -
+        metrics.yearlyIncomeExpenseData.find((y) => y.year === lastYear)
+          ?.expense || 0;
+    currNet =
+      metrics.yearlyIncomeExpenseData.find((y) => y.year === thisYear)?.income -
+        metrics.yearlyIncomeExpenseData.find((y) => y.year === thisYear)
+          ?.expense || 0;
+  }
+  const netChange =
+    prevNet && currNet
+      ? (((currNet - prevNet) / Math.abs(prevNet)) * 100).toFixed(1)
+      : null;
 
   const statCards = [
     {
-      title: "Total Income",
-      value: `$${metrics.totalIncome.toLocaleString()}`,
+      title: "Total Income💵",
+      value: `₹${metrics.totalIncome.toLocaleString()}`,
       icon: <ArrowUpRight className="h-6 w-6 text-green-500" />,
       bgColor: "bg-white",
       textColor: "text-black",
-      subText:
-        incomeChange !== null
-          ? `${incomeChange > 0 ? "+" : ""}${incomeChange}% from last month`
-          : "N/A",
-      subTextColor:
-        incomeChange > 0
+      subText: incomeExpenseData.every((d) => d.income === 0 && d.expense === 0)
+        ? "N/A"
+        : incomeExpenseView === "monthly"
+        ? `${
+            incomeExpenseData[incomeExpenseData.length - 1].incomeChange > 0
+              ? "+"
+              : ""
+          }${
+            incomeExpenseData[incomeExpenseData.length - 1].incomeChange
+          }% from last month`
+        : `${
+            incomeExpenseData[incomeExpenseData.length - 1].incomeChange > 0
+              ? "+"
+              : ""
+          }${
+            incomeExpenseData[incomeExpenseData.length - 1].incomeChange
+          }% from last year`,
+      subTextColor: incomeExpenseData.every(
+        (d) => d.income === 0 && d.expense === 0
+      )
+        ? "text-gray-500"
+        : incomeExpenseView === "monthly"
+        ? incomeExpenseData[incomeExpenseData.length - 1].incomeChange > 0
           ? "text-green-500"
-          : incomeChange < 0
+          : incomeExpenseData[incomeExpenseData.length - 1].incomeChange < 0
           ? "text-red-500"
-          : "text-gray-500",
+          : "text-gray-500"
+        : incomeExpenseData[incomeExpenseData.length - 1].incomeChange > 0
+        ? "text-green-500"
+        : incomeExpenseData[incomeExpenseData.length - 1].incomeChange < 0
+        ? "text-red-500"
+        : "text-gray-500",
     },
     {
-      title: "Total Expenses",
-      value: `$${metrics.totalExpenses.toLocaleString()}`,
+      title: "Total Expenses🧾",
+      value: `₹${metrics.totalExpenses.toLocaleString()}`,
       icon: <ArrowDownRight className="h-6 w-6 text-red-500" />,
       bgColor: "bg-white",
       textColor: "text-black",
-      subText:
-        expenseChange !== null
-          ? `${expenseChange > 0 ? "+" : ""}${expenseChange}% from last month`
-          : "N/A",
-      subTextColor:
-        expenseChange > 0
+      subText: incomeExpenseData.every((d) => d.income === 0 && d.expense === 0)
+        ? "N/A"
+        : incomeExpenseView === "monthly"
+        ? `${
+            incomeExpenseData[incomeExpenseData.length - 1].expenseChange > 0
+              ? "+"
+              : ""
+          }${
+            incomeExpenseData[incomeExpenseData.length - 1].expenseChange
+          }% from last month`
+        : `${
+            incomeExpenseData[incomeExpenseData.length - 1].expenseChange > 0
+              ? "+"
+              : ""
+          }${
+            incomeExpenseData[incomeExpenseData.length - 1].expenseChange
+          }% from last year`,
+      subTextColor: incomeExpenseData.every(
+        (d) => d.income === 0 && d.expense === 0
+      )
+        ? "text-gray-500"
+        : incomeExpenseView === "monthly"
+        ? incomeExpenseData[incomeExpenseData.length - 1].expenseChange > 0
           ? "text-red-500"
-          : expenseChange < 0
+          : incomeExpenseData[incomeExpenseData.length - 1].expenseChange < 0
           ? "text-green-500"
-          : "text-gray-500",
+          : "text-gray-500"
+        : incomeExpenseData[incomeExpenseData.length - 1].expenseChange > 0
+        ? "text-red-500"
+        : incomeExpenseData[incomeExpenseData.length - 1].expenseChange < 0
+        ? "text-green-500"
+        : "text-gray-500",
     },
     {
-      title: "Net Savings",
-      value: `$${metrics.netSavings.toLocaleString()}`,
+      title: "Net Balance💰",
+      value: `₹${metrics.netSavings.toLocaleString()}`,
       icon: <DollarSign className="h-6 w-6 text-blue-500" />,
       bgColor: "bg-white",
       textColor: "text-black",
-      subText: "+15% from last month",
-      subTextColor: "text-blue-500",
+      subText:
+        netChange !== null
+          ? `${netChange > 0 ? "+" : ""}${netChange}% from last ${
+              incomeExpenseView === "monthly" ? "month" : "year"
+            }`
+          : "N/A",
+      subTextColor:
+        netChange > 0
+          ? "text-blue-500"
+          : netChange < 0
+          ? "text-red-500"
+          : "text-gray-500",
     },
   ];
 
@@ -157,15 +232,29 @@ const Dashboard = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <button className="px-3 py-1 rounded bg-blue-100 text-blue-600 text-xs font-semibold">
+                <button
+                  className={`px-3 py-1 rounded text-xs font-semibold ${
+                    incomeExpenseView === "monthly"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                  onClick={() => setIncomeExpenseView("monthly")}
+                >
                   Monthly
                 </button>
-                <button className="px-3 py-1 rounded bg-gray-100 text-gray-500 text-xs font-semibold">
+                <button
+                  className={`px-3 py-1 rounded text-xs font-semibold ${
+                    incomeExpenseView === "yearly"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                  onClick={() => setIncomeExpenseView("yearly")}
+                >
                   Yearly
                 </button>
               </div>
             </div>
-            {metrics.incomeExpenseData.every(
+            {incomeExpenseData.every(
               (d) => d.income === 0 && d.expense === 0
             ) ? (
               <div className="text-gray-400 text-center py-12">
@@ -173,8 +262,11 @@ const Dashboard = () => {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={metrics.incomeExpenseData}>
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <BarChart data={incomeExpenseData}>
+                  <XAxis
+                    dataKey={incomeExpenseView === "monthly" ? "month" : "year"}
+                    tick={{ fontSize: 12 }}
+                  />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip />
                   <Bar
@@ -228,7 +320,7 @@ const Dashboard = () => {
                           stroke="#6366f1"
                           strokeWidth={3}
                         />
-                        <Pie {...props} />
+                        {/* <Pie {...props} /> */}
                       </g>
                     )}
                   >

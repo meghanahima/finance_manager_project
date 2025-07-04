@@ -7,7 +7,7 @@ const Navbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-  const email = "user@example.com";
+  const email = "hi";
 
   useEffect(() => {
     function handleClickOutside(event) {
