@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Edit, Trash2, HandCoins } from "lucide-react";
 import { ChevronDown, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import StatCard from "../utilities/StatCard";
+
+const USER_ID = "68678c3cec1eabca2dc85857"; // TODO: Replace with real userId from auth
 
 const mockTransactions = [
   {
@@ -109,25 +111,67 @@ const Transactions = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [netBalance, setNetBalance] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const perPage = 10;
 
-  // Totals
-  const totalIncome = mockTransactions
-    .filter((t) => t.type === "Income")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = mockTransactions
-    .filter((t) => t.type === "Expense")
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const netBalance = totalIncome - totalExpenses;
+  // Fetch transactions from API
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setLoading(true);
+      setError("");
+      let matchCriteria = { userId: USER_ID };
+      if (typeFilter !== "All") matchCriteria.type = typeFilter;
+      if (categoryFilter) matchCriteria.category = categoryFilter;
+      if (startDate || endDate) {
+        matchCriteria.dateOfTransaction = {};
+        if (startDate) matchCriteria.dateOfTransaction.$gte = startDate;
+        if (endDate) matchCriteria.dateOfTransaction.$lte = endDate;
+      }
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/transaction/view-transactions",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              matchCriteria,
+              skip: (page - 1) * perPage,
+              limit: perPage,
+            }),
+          }
+        );
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.message || "Failed to fetch transactions");
+        setTransactions(data.data.transactions || []);
+        setTotalCount(data.data.count || 0);
+        // Calculate totals
+        let income = 0,
+          expenses = 0;
+        (data.data.transactions || []).forEach((t) => {
+          if (t.type === "Income") income += Number(t.amount);
+          if (t.type === "Expense") expenses += Math.abs(Number(t.amount));
+        });
+        setTotalIncome(income);
+        setTotalExpenses(expenses);
+        setNetBalance(income - expenses);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, [typeFilter, categoryFilter, startDate, endDate, page]);
 
-  // Filtering
-  const filtered = mockTransactions.filter((t) => {
-    const tDate = new Date(t.date);
-    const afterStart = !startDate || tDate >= new Date(startDate);
-    const beforeEnd = !endDate || tDate <= new Date(endDate);
-    const typeMatch = typeFilter === "All" || t.type === typeFilter;
-    const categoryMatch = !categoryFilter || t.category === categoryFilter;
-    return typeMatch && categoryMatch && afterStart && beforeEnd;
-  });
+  const totalPages = Math.ceil(totalCount / perPage);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8">
@@ -216,7 +260,8 @@ const Transactions = () => {
           Transaction History
         </h1>
         <p className="mb-6 text-gray-500">
-          Showing {filtered.length} of {mockTransactions.length} transactions
+          Showing {transactions.length} of {mockTransactions.length}{" "}
+          transactions
         </p>
         <div className="overflow-x-auto rounded-xl border border-gray-200">
           <table className="min-w-full text-sm bg-white rounded-xl">
@@ -231,17 +276,21 @@ const Transactions = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((t, idx) => (
+              {transactions.map((t, idx) => (
                 <tr
                   key={idx}
                   className="border-b-gray-200 last:border-b-0 hover:bg-gray-50 transition"
                 >
                   <td className="py-2 px-4 font-medium text-gray-700">
-                    {new Date(t.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "2-digit",
-                      year: "numeric",
-                    })}
+                    {t.dateOfTransaction
+                      ? new Date(t.dateOfTransaction).toString() !==
+                        "Invalid Date"
+                        ? new Date(t.dateOfTransaction).toLocaleDateString(
+                            "en-US",
+                            { month: "short", day: "2-digit", year: "numeric" }
+                          )
+                        : "-"
+                      : "-"}
                   </td>
                   <td className="py-2 px-4">
                     <span
@@ -284,21 +333,30 @@ const Transactions = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-6">
           <span className="text-gray-500">
-            Page 1 of 1 • {mockTransactions.length} total transactions
+            Page {page} of {totalPages} • {mockTransactions.length} total
+            transactions
           </span>
           <div className="flex gap-2">
             <button
               className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700"
-              disabled
+              onClick={() => setPage(page - 1)}
+              disabled={page === 1}
             >
               Previous
             </button>
-            <button className="px-3 py-1 rounded border border-blue-600 bg-blue-600 text-white font-semibold">
-              1
-            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700"
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
             <button
               className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700"
-              disabled
+              onClick={() => setPage(page + 1)}
+              disabled={page === totalPages}
             >
               Next
             </button>

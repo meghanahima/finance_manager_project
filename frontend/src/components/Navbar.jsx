@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { UserCircle, ChevronDown } from "lucide-react";
+import { UserCircle, ChevronDown, Menu } from "lucide-react";
 import { useNavigate, NavLink } from "react-router-dom";
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const email = "user@example.com";
@@ -23,51 +24,42 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  const navLinks = [
+    { to: "/dashboard", label: "Dashboard" },
+    { to: "/transactions", label: "Transactions" },
+    { to: "/addTransaction", label: "Add Transaction" },
+    { to: "/import-transactions", label: "Import Transactions" },
+  ];
+
   return (
-    <nav className="w-full bg-white shadow flex items-center px-6 py-3 border-b border-gray-200 z-10">
-      <div className="flex-1 flex items-center gap-8">
-        <span className="text-xl font-bold text-teal-700">FinAssist</span>
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            `text-gray-700 font-medium px-3 py-2 rounded transition ${
-              isActive ? "bg-teal-50 text-teal-700" : "hover:text-teal-700"
-            }`
-          }
-        >
-          Dashboard
-        </NavLink>
-        <NavLink
-          to="/transactions"
-          className={({ isActive }) =>
-            `text-gray-700 font-medium px-3 py-2 rounded transition ${
-              isActive ? "bg-teal-50 text-teal-700" : "hover:text-teal-700"
-            }`
-          }
-        >
-          Transactions
-        </NavLink>
-        <NavLink
-          to="/addTransaction"
-          className={({ isActive }) =>
-            `text-gray-700 font-medium px-3 py-2 rounded transition ${
-              isActive ? "bg-teal-50 text-teal-700" : "hover:text-teal-700"
-            }`
-          }
-        >
-          Add Transaction
-        </NavLink>
-        <NavLink
-          to="/import-transactions"
-          className={({ isActive }) =>
-            `text-gray-700 font-medium px-3 py-2 rounded transition ${
-              isActive ? "bg-teal-50 text-teal-700" : "hover:text-teal-700"
-            }`
-          }
-        >
-          Import Transactions
-        </NavLink>
+    <nav className="w-full bg-white shadow flex items-center px-6 py-3 border-b border-gray-200 z-10 relative">
+      {/* Hamburger for mobile */}
+      <button
+        className="md:hidden mr-3"
+        onClick={() => setSidebarOpen(true)}
+        aria-label="Open menu"
+      >
+        <Menu className="h-7 w-7 text-gray-600" />
+      </button>
+      {/* Brand */}
+      <span className="text-xl font-bold text-teal-700 flex-1">FinAssist</span>
+      {/* Desktop nav links */}
+      <div className="hidden md:flex flex-1 items-center gap-8">
+        {navLinks.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) =>
+              `text-gray-700 font-medium px-3 py-2 rounded transition ${
+                isActive ? "bg-teal-50 text-teal-700" : "hover:text-teal-700"
+              }`
+            }
+          >
+            {link.label}
+          </NavLink>
+        ))}
       </div>
+      {/* Profile dropdown */}
       <div className="relative" ref={dropdownRef}>
         <button
           className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 transition"
@@ -90,6 +82,54 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      {/* Sidebar for mobile */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 flex">
+          <div
+            className="fixed inset-0 bg-black opacity-30"
+            onClick={() => setSidebarOpen(false)}
+          ></div>
+          <div className="relative w-64 bg-white h-full shadow-lg flex flex-col p-6">
+            <button
+              className="absolute top-4 right-4"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close menu"
+            >
+              ✕
+            </button>
+            <div className="flex flex-col gap-4 mt-10">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `text-gray-700 font-medium px-3 py-2 rounded transition ${
+                      isActive
+                        ? "bg-teal-50 text-teal-700"
+                        : "hover:text-teal-700"
+                    }`
+                  }
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+            <div className="mt-auto border-t pt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <UserCircle className="h-7 w-7 text-gray-600" />
+                <span className="text-gray-700 text-sm">{email}</span>
+              </div>
+              <button
+                className="w-full text-left px-4 py-3 text-red-600 hover:bg-gray-50 rounded-xl text-sm font-medium"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

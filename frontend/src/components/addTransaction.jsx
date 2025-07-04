@@ -37,6 +37,15 @@ const AddTransaction = () => {
     description: "",
   });
 
+  const AZURE_BLOB_SAS_TOKEN =
+    "?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2026-07-04T02:09:27Z&st=2025-07-04T18:09:27Z&spr=https&sig=tw8uGUre%2BV1IdKbq6b3j%2BQWn7PH0VDmOObBoQsp2IqQ%3D";
+  const AZURE_BLOB_BASE_URL =
+    "https://transactionsdocs.blob.core.windows.net/receipts";
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState("");
+
   useEffect(() => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -47,9 +56,96 @@ const AddTransaction = () => {
     setUploadForm((f) => ({ ...f, date: formatted }));
   }, []);
 
+  // Upload file to Azure Blob Storage
+  const uploadToAzure = async (file) => {
+    const blobName = `${Date.now()}_${file.name}`;
+    const uploadUrl = `${AZURE_BLOB_BASE_URL}/${encodeURIComponent(
+      blobName
+    )}${AZURE_BLOB_SAS_TOKEN}`;
+    await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "x-ms-blob-type": "BlockBlob" },
+      body: file,
+    });
+    return `${AZURE_BLOB_BASE_URL}/${encodeURIComponent(
+      blobName
+    )}${AZURE_BLOB_SAS_TOKEN}`;
+  };
+
+  // Analyze receipt
+  const analyzeReceipt = async (file) => {
+    setUploadLoading(true);
+    setAnalyzeError("");
+    try {
+      const fileUrl = await uploadToAzure(file);
+      const res = await fetch(
+        "http://localhost:5000/api/transaction/analyze-receipt",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileUrl }),
+        }
+      );
+      const data = await res.json();
+      if (
+        !res.ok ||
+        data.data?.message === "Document Not Found to be receipt"
+      ) {
+        setAnalyzeError("Document Not Found to be receipt");
+        return;
+      }
+      // Fill uploadForm with extracted data
+      setUploadForm((f) => ({
+        ...f,
+        ...data.data,
+        date: data.data.date ? data.data.date.slice(0, 10) : f.date,
+        amount: data.data.amount || f.amount,
+        category: data.data.category || f.category,
+        description: data.data.description || f.description,
+      }));
+    } catch (err) {
+      setAnalyzeError("Failed to analyze receipt");
+    } finally {
+      setUploadLoading(false);
+    }
+  };
+
+  // On file change in upload tab
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
+    if (selectedFile) {
+      analyzeReceipt(selectedFile);
+    }
+  };
+
+  // Save transaction (manual entry)
+  const saveManualTransaction = async () => {
+    setSaving(true);
+    setSaveSuccess("");
+    const payload = {
+      userId: "68678c3cec1eabca2dc85857", // TODO: get from auth
+      category: manualForm.category,
+      type: manualForm.type,
+      amount: Number(manualForm.amount),
+      description: manualForm.description,
+      dateOfTransaction: manualForm.date,
+    };
+    await fetch("http://localhost:5000/api/transaction/add-transaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    setSaveSuccess("Transaction saved successfully!");
+    setTimeout(() => setSaveSuccess(""), 2000);
+    setManualForm({
+      type: "Income",
+      category: "",
+      amount: "",
+      date: manualForm.date,
+      description: "",
+    });
+    setSaving(false);
   };
 
   const handleRemoveFile = () => {
@@ -213,9 +309,14 @@ const AddTransaction = () => {
             <button
               className="w-full py-3 rounded-xl bg-blue-500 text-white font-semi-bold text-lg shadow-md hover:bg-blue-600 transition cursor-pointer"
               type="button"
+              onClick={saveManualTransaction}
+              disabled={saving}
             >
-              ✓ Save Transaction
+              {saving ? "Saving transaction..." : "✓ Save Transaction"}
             </button>
+            {saveSuccess && (
+              <div className="text-green-600 text-sm mb-2">{saveSuccess}</div>
+            )}
           </div>
         )}
         {activeTab === "upload" && (
@@ -354,6 +455,9 @@ const AddTransaction = () => {
                   }
                 />
               </div>
+              {analyzeError && (
+                <div className="text-red-500 text-sm mb-2">{analyzeError}</div>
+              )}
               <button
                 className="w-full py-3 rounded-xl bg-purple-500 text-white font-semi-bold text-lg shadow-md hover:bg-purple-600 transition cursor-pointer"
                 type="button"
