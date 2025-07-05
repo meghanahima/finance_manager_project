@@ -243,9 +243,220 @@ const dashboardMetrics = async (req, res) => {
   }
 };
 
+const deleteTransaction = async (req, res) => {
+  const { transactionId, userId } = req.body;
+
+  if (!transactionId || !userId) {
+    return processRequest(
+      { message: "TransactionId and UserId are required" },
+      null,
+      res
+    );
+  }
+
+  try {
+    const userObjId = new mongoose.Types.ObjectId(userId);
+    const transactionObjId = new mongoose.Types.ObjectId(transactionId);
+
+    // Verify the transaction belongs to the user
+    const transaction = await Transaction.findOne({
+      _id: transactionObjId,
+      userId: userObjId,
+    });
+
+    if (!transaction) {
+      return processRequest(
+        { message: "Transaction not found or access denied" },
+        null,
+        res
+      );
+    }
+
+    await Transaction.findByIdAndDelete(transactionObjId);
+
+    return processRequest(
+      null,
+      { message: "Transaction deleted successfully" },
+      res
+    );
+  } catch (err) {
+    console.log(err);
+    return processRequest(err, null, res);
+  }
+};
+
+const updateTransaction = async (req, res) => {
+  const {
+    transactionId,
+    userId,
+    category,
+    type,
+    amount,
+    description,
+    dateOfTransaction,
+  } = req.body;
+
+  if (!transactionId || !userId) {
+    return processRequest(
+      { message: "TransactionId and UserId are required" },
+      null,
+      res
+    );
+  }
+
+  try {
+    const userObjId = new mongoose.Types.ObjectId(userId);
+    const transactionObjId = new mongoose.Types.ObjectId(transactionId);
+
+    // Verify the transaction belongs to the user
+    const transaction = await Transaction.findOne({
+      _id: transactionObjId,
+      userId: userObjId,
+    });
+
+    if (!transaction) {
+      return processRequest(
+        { message: "Transaction not found or access denied" },
+        null,
+        res
+      );
+    }
+
+    const updateData = {};
+    if (category !== undefined) updateData.category = category;
+    if (type !== undefined) updateData.type = type;
+    if (amount !== undefined) updateData.amount = amount;
+    if (description !== undefined) updateData.description = description;
+    if (dateOfTransaction !== undefined)
+      updateData.dateOfTransaction = dateOfTransaction;
+
+    const updatedTransaction = await Transaction.findByIdAndUpdate(
+      transactionObjId,
+      updateData,
+      { new: true }
+    );
+
+    return processRequest(null, updatedTransaction, res);
+  } catch (err) {
+    console.log(err);
+    return processRequest(err, null, res);
+  }
+};
+
+const importTransactions = async (req, res) => {
+  const { userId, transactions } = req.body;
+
+  try {
+    if (!userId) {
+      return processRequest({ message: "UserId is required" }, null, res);
+    }
+
+    if (
+      !transactions ||
+      !Array.isArray(transactions) ||
+      transactions.length === 0
+    ) {
+      return processRequest(
+        { message: "Transactions array is required and cannot be empty" },
+        null,
+        res
+      );
+    }
+
+    // Validate and prepare transactions for insertion
+    const validTransactions = [];
+    const errors = [];
+
+    for (let i = 0; i < transactions.length; i++) {
+      const transaction = transactions[i];
+
+      try {
+        // Validate required fields
+        if (!transaction.amount || !transaction.type || !transaction.category) {
+          errors.push(
+            `Transaction ${
+              i + 1
+            }: Missing required fields (amount, type, category)`
+          );
+          continue;
+        }
+
+        // Validate amount
+        const amount = parseFloat(transaction.amount);
+        if (isNaN(amount) || amount <= 0) {
+          errors.push(`Transaction ${i + 1}: Invalid amount`);
+          continue;
+        }
+
+        // Validate type
+        if (!["Income", "Expense"].includes(transaction.type)) {
+          errors.push(
+            `Transaction ${i + 1}: Invalid type. Must be 'Income' or 'Expense'`
+          );
+          continue;
+        }
+
+        // Validate date
+        let dateOfTransaction = new Date();
+        if (transaction.date && transaction.date.trim() !== "") {
+          dateOfTransaction = new Date(transaction.date);
+          if (isNaN(dateOfTransaction.getTime())) {
+            errors.push(`Transaction ${i + 1}: Invalid date format`);
+            continue;
+          }
+        }
+
+        // Prepare transaction object
+        const validTransaction = {
+          userId: new mongoose.Types.ObjectId(userId),
+          amount: amount,
+          type: transaction.type,
+          category: transaction.category,
+          description: transaction.description || "",
+          dateOfTransaction: dateOfTransaction,
+        };
+
+        validTransactions.push(validTransaction);
+      } catch (error) {
+        errors.push(`Transaction ${i + 1}: ${error.message}`);
+      }
+    }
+
+    // If there are validation errors, return them
+    if (errors.length > 0) {
+      return processRequest(
+        { message: "Validation errors", errors },
+        null,
+        res
+      );
+    }
+
+    // Insert valid transactions
+    const insertedTransactions = await Transaction.insertMany(
+      validTransactions
+    );
+
+    return processRequest(
+      null,
+      {
+        imported: insertedTransactions.length,
+        failed: transactions.length - insertedTransactions.length,
+        transactions: insertedTransactions,
+      },
+      res
+    );
+  } catch (err) {
+    console.log("Import error:", err);
+    return processRequest(err, null, res);
+  }
+};
+
 module.exports = {
   addTransaction,
   viewTransactions,
   analyzeReceipt,
   dashboardMetrics,
+  deleteTransaction,
+  updateTransaction,
+  importTransactions,
 };

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { analyzeReceiptWithGemini } from "../utilities/geminiAnalysis.js";
+import { getUserId } from "../utilities/auth.js";
 
-const categories = [
+const expenseCategories = [
   { label: "Food & Dining", icon: "🍽️" },
   { label: "Transportation", icon: "🚗" },
   { label: "Shopping", icon: "🛍️" },
@@ -8,17 +10,21 @@ const categories = [
   { label: "Entertainment", icon: "🎬" },
   { label: "Healthcare", icon: "🩺" },
   { label: "Education", icon: "📚" },
-  { label: "Travel", icon: "✈️" },
-  { label: "Investment", icon: "💼" },
+  { label: "Other", icon: "📦" },
+];
+
+const incomeCategories = [
+  { label: "Salary", icon: "💼" },
+  { label: "Freelance", icon: "💻" },
+  { label: "Business", icon: "🏢" },
+  { label: "Investment", icon: "📈" },
+  { label: "Rental", icon: "🏠" },
+  { label: "Gift", icon: "🎁" },
+  { label: "Bonus", icon: "💰" },
   { label: "Other", icon: "📦" },
 ];
 
 const AddTransaction = () => {
-  const [type, setType] = useState("Income");
-  const [category, setCategory] = useState("");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
   const [activeTab, setActiveTab] = useState("manual");
   const [file, setFile] = useState(null);
 
@@ -36,11 +42,6 @@ const AddTransaction = () => {
     date: "",
     description: "",
   });
-
-  const AZURE_BLOB_SAS_TOKEN =
-    "?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2026-07-04T02:09:27Z&st=2025-07-04T18:09:27Z&spr=https&sig=tw8uGUre%2BV1IdKbq6b3j%2BQWn7PH0VDmOObBoQsp2IqQ%3D";
-  const AZURE_BLOB_BASE_URL =
-    "https://transactionsdocs.blob.core.windows.net/receipts";
   const [uploadLoading, setUploadLoading] = useState(false);
   const [analyzeError, setAnalyzeError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -56,55 +57,33 @@ const AddTransaction = () => {
     setUploadForm((f) => ({ ...f, date: formatted }));
   }, []);
 
-  // Upload file to Azure Blob Storage
-  const uploadToAzure = async (file) => {
-    const blobName = `${Date.now()}_${file.name}`;
-    const uploadUrl = `${AZURE_BLOB_BASE_URL}/${encodeURIComponent(
-      blobName
-    )}${AZURE_BLOB_SAS_TOKEN}`;
-    await fetch(uploadUrl, {
-      method: "PUT",
-      headers: { "x-ms-blob-type": "BlockBlob" },
-      body: file,
-    });
-    return `${AZURE_BLOB_BASE_URL}/${encodeURIComponent(
-      blobName
-    )}${AZURE_BLOB_SAS_TOKEN}`;
-  };
-
-  // Analyze receipt
+  // Analyze receipt using Gemini AI
   const analyzeReceipt = async (file) => {
     setUploadLoading(true);
     setAnalyzeError("");
+
     try {
-      const fileUrl = await uploadToAzure(file);
-      const res = await fetch(
-        "http://localhost:5000/api/transaction/analyze-receipt",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fileUrl }),
-        }
-      );
-      const data = await res.json();
-      if (
-        !res.ok ||
-        data.data?.message === "Document Not Found to be receipt"
-      ) {
-        setAnalyzeError("Document Not Found to be receipt");
+      // Analyze receipt with Gemini AI directly
+      const analysisResult = await analyzeReceiptWithGemini(file);
+
+      if (!analysisResult.success) {
+        setAnalyzeError(analysisResult.error || "Failed to analyze receipt");
         return;
       }
+
+      const extractedData = analysisResult.data;
+
       // Fill uploadForm with extracted data
       setUploadForm((f) => ({
         ...f,
-        ...data.data,
-        date: data.data.date ? data.data.date.slice(0, 10) : f.date,
-        amount: data.data.amount || f.amount,
-        category: data.data.category || f.category,
-        description: data.data.description || f.description,
+        type: extractedData.type || f.type,
+        category: extractedData.category || f.category,
+        amount: extractedData.amount || f.amount,
+        description: extractedData.description || f.description,
+        date: extractedData.date ? extractedData.date : f.date,
       }));
-    } catch (err) {
-      setAnalyzeError("Failed to analyze receipt");
+    } catch (error) {
+      setAnalyzeError(`Failed to analyze receipt: ${error.message}`);
     } finally {
       setUploadLoading(false);
     }
@@ -113,7 +92,32 @@ const AddTransaction = () => {
   // On file change in upload tab
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
+
+    // Validate file type
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "application/pdf",
+    ];
+    if (selectedFile && !allowedTypes.includes(selectedFile.type)) {
+      setAnalyzeError(
+        "Please upload only image files (JPG, PNG, GIF) or PDF files"
+      );
+      return;
+    }
+
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (selectedFile && selectedFile.size > maxSize) {
+      setAnalyzeError("File size must be less than 10MB");
+      return;
+    }
+
     setFile(selectedFile);
+    setAnalyzeError(""); // Clear any previous errors
+
     if (selectedFile) {
       analyzeReceipt(selectedFile);
     }
@@ -121,31 +125,148 @@ const AddTransaction = () => {
 
   // Save transaction (manual entry)
   const saveManualTransaction = async () => {
+    // Validate required fields
+    if (
+      !manualForm.amount ||
+      !manualForm.category ||
+      !manualForm.type ||
+      !manualForm.date
+    ) {
+      setSaveSuccess(
+        "Please fill in all required fields: amount, category, type and date."
+      );
+      setTimeout(() => setSaveSuccess(""), 3000);
+      return;
+    }
+
+    // Validate amount is a positive number
+    if (Number(manualForm.amount) <= 0) {
+      setSaveSuccess("Please enter a valid amount greater than 0.");
+      setTimeout(() => setSaveSuccess(""), 3000);
+      return;
+    }
+
     setSaving(true);
     setSaveSuccess("");
-    const payload = {
-      userId: "68678c3cec1eabca2dc85857", // TODO: get from auth
-      category: manualForm.category,
-      type: manualForm.type,
-      amount: Number(manualForm.amount),
-      description: manualForm.description,
-      dateOfTransaction: manualForm.date,
-    };
-    await fetch("http://localhost:5000/api/transaction/add-transaction", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    setSaveSuccess("Transaction saved successfully!");
-    setTimeout(() => setSaveSuccess(""), 2000);
-    setManualForm({
-      type: "Income",
-      category: "",
-      amount: "",
-      date: manualForm.date,
-      description: "",
-    });
-    setSaving(false);
+
+    try {
+      const userId = getUserId();
+      if (!userId) {
+        setSaveSuccess("Please log in to save transactions.");
+        setTimeout(() => setSaveSuccess(""), 3000);
+        return;
+      }
+
+      const payload = {
+        userId: userId,
+        category: manualForm.category,
+        type: manualForm.type,
+        amount: Number(manualForm.amount),
+        description: manualForm.description,
+        dateOfTransaction: manualForm.date,
+      };
+
+      const response = await fetch(
+        "http://localhost:5000/api/transaction/add-transaction",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (response.ok) {
+        setSaveSuccess("Transaction saved successfully!");
+        setTimeout(() => setSaveSuccess(""), 2000);
+        setManualForm({
+          type: "Income",
+          category: "",
+          amount: "",
+          date: manualForm.date,
+          description: "",
+        });
+      } else {
+        setSaveSuccess("Failed to save transaction. Please try again.");
+        setTimeout(() => setSaveSuccess(""), 3000);
+      }
+    } catch {
+      setSaveSuccess("Failed to save transaction. Please try again.");
+      setTimeout(() => setSaveSuccess(""), 3000);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Save transaction (upload/AI-extracted entry)
+  const saveUploadTransaction = async () => {
+    // Validate required fields
+    if (!uploadForm.amount || !uploadForm.category || !uploadForm.type) {
+      setSaveSuccess("");
+      alert("Please fill in all required fields: Amount, Category, and Type");
+      return;
+    }
+
+    // Validate amount is positive
+    if (Number(uploadForm.amount) <= 0) {
+      setSaveSuccess("");
+      alert("Amount must be greater than 0");
+      return;
+    }
+
+    setSaving(true);
+    setSaveSuccess("");
+
+    try {
+      const userId = getUserId();
+      if (!userId) {
+        setSaveSuccess("Please log in to save transactions.");
+        setTimeout(() => setSaveSuccess(""), 3000);
+        return;
+      }
+
+      const payload = {
+        userId: userId,
+        category: uploadForm.category,
+        type: uploadForm.type,
+        amount: Number(uploadForm.amount),
+        description: uploadForm.description,
+        dateOfTransaction: uploadForm.date,
+      };
+
+      const response = await fetch(
+        "http://localhost:5000/api/transaction/add-transaction",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (response.ok) {
+        setSaveSuccess("Transaction saved successfully!");
+        setTimeout(() => setSaveSuccess(""), 2000);
+        // Reset upload form
+        setUploadForm({
+          type: "Income",
+          category: "",
+          amount: "",
+          date: "",
+          description: "",
+        });
+        setFile(null);
+        // Reset file input
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) fileInput.value = "";
+      } else {
+        setSaveSuccess("Failed to save transaction. Please try again.");
+        setTimeout(() => setSaveSuccess(""), 3000);
+      }
+    } catch {
+      setSaveSuccess("Failed to save transaction. Please try again.");
+      setTimeout(() => setSaveSuccess(""), 3000);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleRemoveFile = () => {
@@ -223,8 +344,11 @@ const AddTransaction = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 Category
               </label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                {categories.map((cat) => (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {(manualForm.type === "Income"
+                  ? incomeCategories
+                  : expenseCategories
+                ).map((cat) => (
                   <button
                     key={cat.label}
                     type="button"
@@ -352,6 +476,7 @@ const AddTransaction = () => {
                 <input
                   id="file-upload"
                   type="file"
+                  accept="image/*,.pdf"
                   className="hidden"
                   onChange={handleFileChange}
                 />
@@ -378,6 +503,42 @@ const AddTransaction = () => {
               <p className="text-gray-500 mb-4 text-sm">
                 Review and edit the AI-extracted transaction data
               </p>
+
+              {/* Transaction Type for Upload Form */}
+              <div className="flex gap-4 mb-4">
+                <button
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border transition font-semibold text-sm ${
+                    uploadForm.type === "Income"
+                      ? "bg-teal-50 border-teal-400 text-teal-600"
+                      : "bg-white border-gray-200 text-gray-500"
+                  }`}
+                  onClick={() =>
+                    setUploadForm((f) => ({
+                      ...f,
+                      type: "Income",
+                      category: "",
+                    }))
+                  }
+                >
+                  <span className="text-lg">💵</span> Income
+                </button>
+                <button
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border transition font-semibold text-sm ${
+                    uploadForm.type === "Expense"
+                      ? "bg-red-50 border-red-600 text-red-500"
+                      : "bg-white border-gray-200 text-gray-500"
+                  }`}
+                  onClick={() =>
+                    setUploadForm((f) => ({
+                      ...f,
+                      type: "Expense",
+                      category: "",
+                    }))
+                  }
+                >
+                  <span className="text-lg">🧾</span> Expense
+                </button>
+              </div>
               <div className="mb-4">
                 <label className="block text-gray-700 font-medium mb-1">
                   Date
@@ -431,9 +592,12 @@ const AddTransaction = () => {
                   }
                 >
                   <option value="">Select Category</option>
-                  {categories.map((cat) => (
+                  {(uploadForm.type === "Income"
+                    ? incomeCategories
+                    : expenseCategories
+                  ).map((cat) => (
                     <option key={cat.label} value={cat.label}>
-                      {cat.label}
+                      {cat.icon} {cat.label}
                     </option>
                   ))}
                 </select>
@@ -458,12 +622,28 @@ const AddTransaction = () => {
               {analyzeError && (
                 <div className="text-red-500 text-sm mb-2">{analyzeError}</div>
               )}
+              {uploadLoading && (
+                <div className="text-blue-500 text-sm mb-2">
+                  Analyzing receipt...
+                </div>
+              )}
               <button
-                className="w-full py-3 rounded-xl bg-purple-500 text-white font-semi-bold text-lg shadow-md hover:bg-purple-600 transition cursor-pointer"
+                className="w-full py-3 rounded-xl bg-purple-500 text-white font-semi-bold text-lg shadow-md hover:bg-purple-600 transition cursor-pointer disabled:bg-gray-400"
                 type="button"
+                onClick={saveUploadTransaction}
+                disabled={
+                  uploadLoading ||
+                  !file ||
+                  saving ||
+                  !uploadForm.amount ||
+                  !uploadForm.category
+                }
               >
-                ✓ Confirm & Save Transaction
+                {saving ? "Saving..." : "✓ Confirm & Save Transaction"}
               </button>
+              {saveSuccess && (
+                <div className="text-green-600 text-sm mt-2">{saveSuccess}</div>
+              )}
             </div>
           </div>
         )}

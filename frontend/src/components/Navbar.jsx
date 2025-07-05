@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { UserCircle, ChevronDown, Menu } from "lucide-react";
 import { useNavigate, NavLink } from "react-router-dom";
+import { getUserEmail, logout } from "../utilities/auth.js";
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-  const email = "hi";
+
+  const email = getUserEmail() || "Guest";
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -20,7 +22,7 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    // Add logout logic here
+    logout();
     navigate("/login");
   };
 
@@ -28,7 +30,7 @@ const Navbar = () => {
     { to: "/dashboard", label: "Dashboard" },
     { to: "/transactions", label: "Transactions" },
     { to: "/addTransaction", label: "Add Transaction" },
-    { to: "/import-transactions", label: "Import Transactions" },
+    { to: "/importTransactions", label: "Import Transactions" },
   ];
 
   return (

@@ -16,8 +16,7 @@ import {
   Line,
   CartesianGrid,
 } from "recharts";
-
-const USER_ID = "68678c3cec1eabca2dc85857"; // TODO: Replace with real userId from auth
+import { getUserId } from "../utilities/auth.js";
 
 const pieColors = [
   "#a78bfa",
@@ -41,13 +40,21 @@ const Dashboard = () => {
     const fetchMetrics = async () => {
       setLoading(true);
       setError("");
+
+      const userId = getUserId();
+      if (!userId) {
+        setError("Please log in to view dashboard.");
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(
           "http://localhost:5000/api/transaction/dashboard-metrics",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: USER_ID }),
+            body: JSON.stringify({ userId: userId }),
           }
         );
         const data = await res.json();
@@ -73,33 +80,57 @@ const Dashboard = () => {
     incomeExpenseView === "monthly"
       ? metrics.incomeExpenseData
       : metrics.yearlyIncomeExpenseData;
-  let prevNet = null,
-    currNet = null;
-  if (incomeExpenseView === "monthly") {
-    const lastMonthIdx = new Date().getMonth() - 1;
-    const thisMonthIdx = new Date().getMonth();
-    prevNet =
-      (metrics.incomeExpenseData?.[lastMonthIdx]?.income || 0) -
-      (metrics.incomeExpenseData?.[lastMonthIdx]?.expense || 0);
-    currNet =
-      (metrics.incomeExpenseData?.[thisMonthIdx]?.income || 0) -
-      (metrics.incomeExpenseData?.[thisMonthIdx]?.expense || 0);
-  } else {
-    const years = metrics.yearlyIncomeExpenseData.map((y) => y.year);
-    const lastYear = years[years.length - 2];
-    const thisYear = years[years.length - 1];
-    prevNet =
-      metrics.yearlyIncomeExpenseData.find((y) => y.year === lastYear)?.income -
-        metrics.yearlyIncomeExpenseData.find((y) => y.year === lastYear)
-          ?.expense || 0;
-    currNet =
-      metrics.yearlyIncomeExpenseData.find((y) => y.year === thisYear)?.income -
-        metrics.yearlyIncomeExpenseData.find((y) => y.year === thisYear)
-          ?.expense || 0;
-  }
+
+  // Calculate monthly comparisons for Income and Expenses (always use monthly)
+  const lastMonthIdx = new Date().getMonth() - 1;
+  const thisMonthIdx = new Date().getMonth();
+
+  const lastMonthData = metrics.incomeExpenseData?.[lastMonthIdx];
+  const thisMonthData = metrics.incomeExpenseData?.[thisMonthIdx];
+
+  const prevMonthIncome = lastMonthData?.income || 0;
+  const currMonthIncome = thisMonthData?.income || 0;
+  const prevMonthExpense = lastMonthData?.expense || 0;
+  const currMonthExpense = thisMonthData?.expense || 0;
+
+  // Calculate yearly comparison for Net Balance (always use yearly)
+  const years = metrics.yearlyIncomeExpenseData?.map((y) => y.year) || [];
+  const lastYear = years[years.length - 2];
+  const thisYear = years[years.length - 1];
+
+  const lastYearData = metrics.yearlyIncomeExpenseData?.find(
+    (y) => y.year === lastYear
+  );
+  const thisYearData = metrics.yearlyIncomeExpenseData?.find(
+    (y) => y.year === thisYear
+  );
+
+  const prevYearNet = lastYearData
+    ? lastYearData.income - lastYearData.expense
+    : 0;
+  const currYearNet = thisYearData
+    ? thisYearData.income - thisYearData.expense
+    : 0;
+
+  // Calculate percentage changes
+  const incomeChange =
+    prevMonthIncome > 0 && currMonthIncome >= 0
+      ? (((currMonthIncome - prevMonthIncome) / prevMonthIncome) * 100).toFixed(
+          1
+        )
+      : null;
+
+  const expenseChange =
+    prevMonthExpense > 0 && currMonthExpense >= 0
+      ? (
+          ((currMonthExpense - prevMonthExpense) / prevMonthExpense) *
+          100
+        ).toFixed(1)
+      : null;
+
   const netChange =
-    prevNet && currNet
-      ? (((currNet - prevNet) / Math.abs(prevNet)) * 100).toFixed(1)
+    prevYearNet !== 0 && currYearNet !== undefined
+      ? (((currYearNet - prevYearNet) / Math.abs(prevYearNet)) * 100).toFixed(1)
       : null;
 
   const statCards = [
@@ -107,92 +138,64 @@ const Dashboard = () => {
       title: "Total Income💵",
       value: `₹${metrics.totalIncome.toLocaleString()}`,
       icon: <ArrowUpRight className="h-6 w-6 text-green-500" />,
-      bgColor: "bg-white",
-      textColor: "text-black",
+      bgColor: "bg-green-50",
+      textColor: "text-green-900",
       subText: incomeExpenseData.every((d) => d.income === 0 && d.expense === 0)
-        ? "N/A"
-        : incomeExpenseView === "monthly"
-        ? `${
-            incomeExpenseData[incomeExpenseData.length - 1].incomeChange > 0
-              ? "+"
-              : ""
-          }${
-            incomeExpenseData[incomeExpenseData.length - 1].incomeChange
-          }% from last month`
-        : `${
-            incomeExpenseData[incomeExpenseData.length - 1].incomeChange > 0
-              ? "+"
-              : ""
-          }${
-            incomeExpenseData[incomeExpenseData.length - 1].incomeChange
-          }% from last year`,
+        ? null
+        : incomeChange !== null
+        ? `${incomeChange > 0 ? "+" : ""}${incomeChange}% from last ${
+            incomeExpenseView === "monthly" ? "month" : "year"
+          }`
+        : null,
       subTextColor: incomeExpenseData.every(
         (d) => d.income === 0 && d.expense === 0
       )
         ? "text-gray-500"
-        : incomeExpenseView === "monthly"
-        ? incomeExpenseData[incomeExpenseData.length - 1].incomeChange > 0
+        : incomeChange !== null
+        ? incomeChange > 0
           ? "text-green-500"
-          : incomeExpenseData[incomeExpenseData.length - 1].incomeChange < 0
+          : incomeChange < 0
           ? "text-red-500"
           : "text-gray-500"
-        : incomeExpenseData[incomeExpenseData.length - 1].incomeChange > 0
-        ? "text-green-500"
-        : incomeExpenseData[incomeExpenseData.length - 1].incomeChange < 0
-        ? "text-red-500"
         : "text-gray-500",
     },
     {
       title: "Total Expenses🧾",
       value: `₹${metrics.totalExpenses.toLocaleString()}`,
       icon: <ArrowDownRight className="h-6 w-6 text-red-500" />,
-      bgColor: "bg-white",
-      textColor: "text-black",
+      bgColor: "bg-red-50",
+      textColor: "text-red-700",
       subText: incomeExpenseData.every((d) => d.income === 0 && d.expense === 0)
-        ? "N/A"
-        : incomeExpenseView === "monthly"
-        ? `${
-            incomeExpenseData[incomeExpenseData.length - 1].expenseChange > 0
-              ? "+"
-              : ""
-          }${
-            incomeExpenseData[incomeExpenseData.length - 1].expenseChange
-          }% from last month`
-        : `${
-            incomeExpenseData[incomeExpenseData.length - 1].expenseChange > 0
-              ? "+"
-              : ""
-          }${
-            incomeExpenseData[incomeExpenseData.length - 1].expenseChange
-          }% from last year`,
+        ? null
+        : expenseChange !== null
+        ? `${expenseChange > 0 ? "+" : ""}${expenseChange}% from last ${
+            incomeExpenseView === "monthly" ? "month" : "year"
+          }`
+        : null,
       subTextColor: incomeExpenseData.every(
         (d) => d.income === 0 && d.expense === 0
       )
         ? "text-gray-500"
-        : incomeExpenseView === "monthly"
-        ? incomeExpenseData[incomeExpenseData.length - 1].expenseChange > 0
+        : expenseChange !== null
+        ? expenseChange > 0
           ? "text-red-500"
-          : incomeExpenseData[incomeExpenseData.length - 1].expenseChange < 0
+          : expenseChange < 0
           ? "text-green-500"
           : "text-gray-500"
-        : incomeExpenseData[incomeExpenseData.length - 1].expenseChange > 0
-        ? "text-red-500"
-        : incomeExpenseData[incomeExpenseData.length - 1].expenseChange < 0
-        ? "text-green-500"
         : "text-gray-500",
     },
     {
       title: "Net Balance💰",
       value: `₹${metrics.netSavings.toLocaleString()}`,
       icon: <DollarSign className="h-6 w-6 text-blue-500" />,
-      bgColor: "bg-white",
-      textColor: "text-black",
+      bgColor: "bg-violet-50",
+      textColor: "text-violet-900",
       subText:
         netChange !== null
           ? `${netChange > 0 ? "+" : ""}${netChange}% from last ${
               incomeExpenseView === "monthly" ? "month" : "year"
             }`
-          : "N/A",
+          : null,
       subTextColor:
         netChange > 0
           ? "text-blue-500"

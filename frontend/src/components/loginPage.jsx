@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  BarChart3,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  Home,
-} from "lucide-react";
+import { BarChart3, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Card, {
   CardContent,
   CardDescription,
@@ -43,6 +35,27 @@ const LoginPage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Something went wrong");
       setSuccess(isLogin ? "Login successful!" : "Registration successful!");
+
+      if (isLogin) {
+        // Store both user ID and email for login
+        localStorage.setItem(
+          "financial_user",
+          JSON.stringify({
+            id: data.data._id,
+            email: data.data.mail,
+          })
+        );
+      } else {
+        // For registration, store the new user data
+        localStorage.setItem(
+          "financial_user",
+          JSON.stringify({
+            id: data.data._id,
+            email: data.data.mail,
+          })
+        );
+      }
+
       setTimeout(() => {
         navigate("/dashboard");
       }, 1000);
