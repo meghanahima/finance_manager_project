@@ -8,10 +8,27 @@ export async function uploadFileToAzure(fileName, file) {
   }
 
   // Azure Storage configuration
-  const accountName = "transactionsdocs";
-  const containerName = "receiptdocs";
-  const sasToken =
-    "sp=racwd&st=2025-07-05T06:17:26Z&se=2026-07-05T14:17:26Z&sv=2024-11-04&sr=c&sig=dpYeQ8Iu40Rw7znqOfUqC%2Bxu6DvjBjtJ6ceiOv0NMQc%3D";
+  const accountName = import.meta.env.VITE_AZURE_ACCOUNT_NAME;
+  const containerName = import.meta.env.VITE_AZURE_CONTAINER_NAME;
+  const sasToken = import.meta.env.VITE_AZURE_SAS_TOKEN;
+
+  // Validate environment variables
+  if (!accountName || !containerName || !sasToken) {
+    return {
+      error:
+        "Azure Storage configuration missing. Please check environment variables (VITE_AZURE_ACCOUNT_NAME, VITE_AZURE_CONTAINER_NAME, VITE_AZURE_SAS_TOKEN).",
+      success: false,
+    };
+  }
+
+  // Validate SAS token format
+  if (!sasToken.includes("sig=")) {
+    return {
+      error:
+        "Invalid Azure SAS token format. Please check VITE_AZURE_SAS_TOKEN.",
+      success: false,
+    };
+  }
 
   const uploadUrl = `https://${accountName}.blob.core.windows.net/${containerName}/${fileName}?${sasToken}`;
 

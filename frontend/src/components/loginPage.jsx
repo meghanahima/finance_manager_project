@@ -7,6 +7,7 @@ import Card, {
   CardTitle,
 } from "../utilities/card";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../utilities/apiConfig";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -24,8 +25,8 @@ const LoginPage = () => {
     setError("");
     setSuccess("");
     const url = isLogin
-      ? "http://localhost:5000/api/user/login"
-      : "http://localhost:5000/api/user/register";
+      ? `${API_BASE_URL}/api/user/login`
+      : `${API_BASE_URL}/api/user/register`;
     try {
       const res = await fetch(url, {
         method: "POST",

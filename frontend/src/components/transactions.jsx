@@ -3,6 +3,7 @@ import { Edit, Trash2, HandCoins } from "lucide-react";
 import { ChevronDown, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import StatCard from "../utilities/StatCard";
 import { getUserId } from "../utilities/auth.js";
+import { API_BASE_URL } from "../utilities/apiConfig";
 
 const expenseCategories = [
   { label: "Food & Dining", icon: "🍽️" },
@@ -208,18 +209,16 @@ const Transactions = () => {
         if (endDate) matchCriteria.dateOfTransaction.$lte = endDate;
       }
       try {
-        const res = await fetch(
-          "http://localhost:5000/api/transaction/view-transactions",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              matchCriteria,
-              skip: (page - 1) * perPage,
-              limit: perPage,
-            }),
-          }
-        );
+        const viewUrl = `${API_BASE_URL}/api/transaction/view-transactions`;
+        const res = await fetch(viewUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            matchCriteria,
+            skip: (page - 1) * perPage,
+            limit: perPage,
+          }),
+        });
         const data = await res.json();
         if (!res.ok)
           throw new Error(data.message || "Failed to fetch transactions");
@@ -257,14 +256,12 @@ const Transactions = () => {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/transaction/delete-transaction",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transactionId, userId }),
-        }
-      );
+      const deleteUrl = `${API_BASE_URL}/api/transaction/delete-transaction`;
+      const response = await fetch(deleteUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactionId, userId }),
+      });
 
       if (response.ok) {
         // Refresh the transactions list
@@ -294,18 +291,16 @@ const Transactions = () => {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/transaction/update-transaction",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            transactionId: editingTransaction._id,
-            userId,
-            ...updatedData,
-          }),
-        }
-      );
+      const updateUrl = `${API_BASE_URL}/api/transaction/update-transaction`;
+      const response = await fetch(updateUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transactionId: editingTransaction._id,
+          userId,
+          ...updatedData,
+        }),
+      });
 
       if (response.ok) {
         const result = await response.json();

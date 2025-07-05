@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { getUserId } from "../utilities/auth.js";
+import { API_BASE_URL } from "../utilities/apiConfig";
 
 const expenseCategories = [
   { label: "Food & Dining", value: "Food & Dining" },
@@ -350,19 +351,16 @@ const ImportTransactions = () => {
         return;
       }
 
-      const response = await fetch(
-        "http://localhost:5000/api/transaction/import",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            transactions: validRows,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/transaction/import`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          transactions: validRows,
+        }),
+      });
 
       const responseData = await response.json();
 

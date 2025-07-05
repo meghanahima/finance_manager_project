@@ -17,6 +17,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { getUserId } from "../utilities/auth.js";
+import { API_BASE_URL } from "../utilities/apiConfig";
 
 const pieColors = [
   "#a78bfa",
@@ -52,7 +53,7 @@ const Dashboard = () => {
 
       try {
         const res = await fetch(
-          "http://localhost:5000/api/transaction/dashboard-metrics",
+          `${API_BASE_URL}/api/transaction/dashboard-metrics`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

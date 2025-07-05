@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { analyzeReceiptWithGemini } from "../utilities/geminiAnalysis.js";
 import { getUserId } from "../utilities/auth.js";
+import { API_BASE_URL } from "../utilities/apiConfig";
 
 const expenseCategories = [
   { label: "Food & Dining", icon: "🍽️" },
@@ -166,14 +167,12 @@ const AddTransaction = () => {
         dateOfTransaction: manualForm.date,
       };
 
-      const response = await fetch(
-        "http://localhost:5000/api/transaction/add-transaction",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const addUrl = `${API_BASE_URL}/api/transaction/add-transaction`;
+      const response = await fetch(addUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (response.ok) {
         setSaveSuccess("Transaction saved successfully!");
@@ -233,14 +232,12 @@ const AddTransaction = () => {
         dateOfTransaction: uploadForm.date,
       };
 
-      const response = await fetch(
-        "http://localhost:5000/api/transaction/add-transaction",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const addUrl = `${API_BASE_URL}/api/transaction/add-transaction`;
+      const response = await fetch(addUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (response.ok) {
         setSaveSuccess("Transaction saved successfully!");
