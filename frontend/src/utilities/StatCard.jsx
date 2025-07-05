@@ -28,7 +28,13 @@ const StatCard = ({
         <span className={`block text-xs mt-1 ${subTextColor}`}>{subText}</span>
       )}
     </div>
-    <div className="flex items-center">{icon || children}</div>
+    <div className="flex items-center">
+      {icon ? (
+        <span className="text-4xl">{icon}</span>
+      ) : (
+        children
+      )}
+    </div>
   </div>
 );
 

@@ -397,15 +397,32 @@ const ImportTransactions = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 text-blue-950">
-            Import Transactions 📊
-          </h1>
-          <p className="text-gray-600">
-            Upload your transaction data from Excel files with ease
-          </p>
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
+            {/* Subtle shine effects */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-center gap-4 mb-3">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
+                  <span className="text-4xl filter drop-shadow-sm">📤</span>
+                </div>
+                <div className="text-center">
+                  <h1 className="text-3xl md:text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-3">
+                    Import Transactions
+                  </h1>
+                  <p className="text-slate-700 text-lg font-medium flex items-center justify-center gap-2">
+                    <span className="inline-block w-1.5 h-1.5 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></span>
+                    Upload your transaction data from Excel files with ease
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-lg p-8">
           {/* File Format Guide */}
           <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
@@ -484,15 +501,6 @@ const ImportTransactions = () => {
                     </div>
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
-                    <p className="text-yellow-800 text-sm">
-                      <strong>Note:</strong> If a category is not found in the
-                      valid list, it will be automatically changed to "Other".
-                      New categories not in the predefined list will be treated
-                      as "Other".
-                    </p>
-                  </div>
-
                   <div className="bg-orange-50 border border-orange-200 rounded p-3">
                     <p className="text-orange-800 text-sm">
                       <strong>Important:</strong> Maximum 50 transactions
@@ -510,14 +518,14 @@ const ImportTransactions = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={downloadExcelTemplate}
-                className="flex items-center px-6 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-fit"
+                className="flex items-center px-6 py-3 font-semibold bg-gradient-to-r from-orange-200 to-pink-200 rounded-lg hover:from-orange-300 hover:to-pink-300 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 w-fit"
               >
                 <Copy className="h-5 w-5 mr-2" />
                 Download Excel Template
               </button>
               <button
                 onClick={downloadSampleExcel}
-                className="flex items-center px-6 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors w-fit"
+                className="flex items-center px-6 py-3 font-semibold bg-gradient-to-r from-emerald-200 to-teal-200  rounded-lg hover:from-emerald-300 hover:to-teal-300 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 w-fit"
               >
                 <Download className="h-5 w-5 mr-2" />
                 Try with sample document (5 transactions)
@@ -530,7 +538,7 @@ const ImportTransactions = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Upload Excel File
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-400 transition-colors">
+            <div className="border-2 border-dashed border-orange-300 bg-gradient-to-br from-orange-50 to-pink-50 rounded-lg p-6 text-center hover:border-orange-400 hover:bg-gradient-to-br hover:from-orange-100 hover:to-pink-100 transition-all duration-200">
               <input
                 id="file-upload"
                 type="file"
@@ -542,7 +550,7 @@ const ImportTransactions = () => {
                 htmlFor="file-upload"
                 className="cursor-pointer flex flex-col items-center"
               >
-                <FileText className="h-12 w-12 text-gray-400 mb-4" />
+                <FileText className="h-12 w-12 text-orange-400 mb-4" />
                 <span className="text-lg font-medium text-gray-700 mb-2">
                   Click to upload Excel file
                 </span>
@@ -633,7 +641,7 @@ const ImportTransactions = () => {
             <button
               onClick={handleImport}
               disabled={!file || loading}
-              className="px-8 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center"
+              className="px-8 py-3 bg-gradient-to-r from-teal-300 to-cyan-300 font-semibold rounded-lg hover:from-teal-400 hover:to-cyan-400 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none flex items-center"
             >
               {loading ? (
                 <>

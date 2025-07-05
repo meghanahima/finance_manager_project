@@ -84,7 +84,7 @@ const Dashboard = () => {
       }
     };
     fetchMetrics();
-  }, []);
+  }, [pieView]);
 
   useEffect(() => {
     if (!metrics) return;
@@ -152,10 +152,9 @@ const Dashboard = () => {
 
   const statCards = [
     {
-      title: "Total Income💵",
+      title: "Total Income",
       value: `₹${thisMonthIncome.toLocaleString()}`,
-      label: "This Month",
-      icon: <ArrowUpRight className="h-6 w-6 text-green-500" />,
+      icon: "💵",
       bgColor: "bg-green-50",
       textColor: "text-green-900",
       subText:
@@ -174,10 +173,9 @@ const Dashboard = () => {
           : "text-gray-500",
     },
     {
-      title: "Total Expenses🧾",
+      title: "Total Expenses",
       value: `₹${thisMonthExpense.toLocaleString()}`,
-      label: "This Month",
-      icon: <ArrowDownRight className="h-6 w-6 text-red-500" />,
+      icon: "🧾",
       bgColor: "bg-red-50",
       textColor: "text-red-700",
       subText:
@@ -200,10 +198,9 @@ const Dashboard = () => {
           : "text-gray-500",
     },
     {
-      title: "Net Balance💰",
+      title: "Net Balance",
       value: `₹${thisMonthNet.toLocaleString()}`,
-      label: "This Month",
-      icon: <DollarSign className="h-6 w-6 text-blue-500" />,
+      icon: "💼",
       bgColor: "bg-violet-50",
       textColor: "text-violet-900",
       subText:
@@ -237,68 +234,289 @@ const Dashboard = () => {
   return (
     <div className="w-full py-6">
       <div className="mb-6">
-        <div className="rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 p-6 flex flex-col md:flex-row md:items-center md:justify-between text-white mb-8">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-1">
-              Hello, Welcome back! <span className="inline-block">👋</span>
-            </h1>
-            <p className="text-base opacity-90">
-              Here's your financial overview
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {statCards.map((card, idx) => (
-            <StatCard key={idx} {...card} />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
+        {/* Enhanced Welcome Section */}
+        <div className="rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
+          {/* Subtle shine effects */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-radial from-white/10 to-transparent rounded-full blur-3xl"></div>
+
+          {/* Content */}
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
+                <span className="text-7xl filter drop-shadow-sm">💰</span>
+              </div>
               <div>
-                <h2 className="font-semibold text-lg text-gray-800">
-                  Income vs Expenses
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  Compare your financial flow over time
+                <h1 className="text-4xl md:text-4xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent leading-tight mb-2">
+                  Financial Assistant
+                </h1>
+                <p className="text-slate-600 text-lg font-medium flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full animate-pulse"></span>
+                  Ready to manage your finances with clarity and control
                 </p>
               </div>
-              <div className="flex gap-2">
-                <button
-                  className={`px-3 py-1 rounded text-xs font-semibold ${
-                    incomeExpenseView === "monthly"
-                      ? "bg-blue-100 text-blue-600"
-                      : "bg-gray-100 text-gray-500"
-                  }`}
-                  onClick={() => setIncomeExpenseView("monthly")}
-                >
-                  Monthly
-                </button>
-                <button
-                  className={`px-3 py-1 rounded text-xs font-semibold ${
-                    incomeExpenseView === "yearly"
-                      ? "bg-blue-100 text-blue-600"
-                      : "bg-gray-100 text-gray-500"
-                  }`}
-                  onClick={() => setIncomeExpenseView("yearly")}
-                >
-                  Yearly
-                </button>
-              </div>
             </div>
-            {incomeExpenseData.every(
-              (d) => d.income === 0 && d.expense === 0
-            ) ? (
+          </div>
+        </div>
+
+        {/* This Month Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+                This Month Overview
+              </h2>
+              <p className="text-slate-500 text-sm font-medium">
+                Your current month's financial summary
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {statCards.map((card, idx) => (
+              <StatCard key={idx} {...card} />
+            ))}
+          </div>
+        </div>
+        {/* Analytics & Charts Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-8 bg-gradient-to-b from-slate-500 to-slate-600 rounded-full shadow-sm"></div>
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+                Financial Analytics
+              </h2>
+              <p className="text-slate-500 text-sm font-medium">
+                Detailed insights and trends analysis
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 shadow-2xl shadow-blue-200/30 border border-white/50 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold text-lg bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+                    Income vs Expenses
+                  </h3>
+                  <p className="text-slate-500 text-sm font-medium">
+                    Compare your financial flow over time
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-300 shadow-sm ${
+                      incomeExpenseView === "monthly"
+                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-200/50 transform scale-105"
+                        : "bg-white/80 text-slate-600 hover:bg-white hover:shadow-md border border-slate-200/50"
+                    }`}
+                    onClick={() => setIncomeExpenseView("monthly")}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-300 shadow-sm ${
+                      incomeExpenseView === "yearly"
+                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-200/50 transform scale-105"
+                        : "bg-white/80 text-slate-600 hover:bg-white hover:shadow-md border border-slate-200/50"
+                    }`}
+                    onClick={() => setIncomeExpenseView("yearly")}
+                  >
+                    Yearly
+                  </button>
+                </div>
+              </div>
+              {incomeExpenseData.every(
+                (d) => d.income === 0 && d.expense === 0
+              ) ? (
+                <div className="text-gray-400 text-center py-12">
+                  No data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={incomeExpenseData}>
+                    <XAxis
+                      dataKey={
+                        incomeExpenseView === "monthly" ? "month" : "year"
+                      }
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      formatter={(value, name) => [
+                        `₹${value.toLocaleString()}`,
+                        name,
+                      ]}
+                    />
+                    <Bar
+                      dataKey="expense"
+                      fill="#f87171"
+                      radius={[4, 4, 0, 0]}
+                      name="Expense"
+                    />
+                    <Bar
+                      dataKey="income"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                      name="Income"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 shadow-2xl shadow-slate-200/30 border border-white/50 hover:shadow-2xl hover:shadow-slate-200/40 transition-all duration-500 flex flex-col items-center justify-center">
+              <div className="flex items-center justify-between w-full mb-4">
+                <div>
+                  <h3 className="font-semibold text-lg bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent">
+                    Expense Categories
+                  </h3>
+                  <p className="text-slate-500 text-sm font-medium">
+                    Breakdown of your spending patterns
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-300 shadow-sm ${
+                      pieView === "monthly"
+                        ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg shadow-slate-200/50 transform scale-105"
+                        : "bg-white/80 text-slate-600 hover:bg-white hover:shadow-md border border-slate-200/50"
+                    }`}
+                    onClick={() => {
+                      setPieView("monthly");
+                      setPiePeriodIndex(0);
+                    }}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-300 shadow-sm ${
+                      pieView === "yearly"
+                        ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg shadow-slate-200/50 transform scale-105"
+                        : "bg-white/80 text-slate-600 hover:bg-white hover:shadow-md border border-slate-200/50"
+                    }`}
+                    onClick={() => {
+                      setPieView("yearly");
+                      setPiePeriodIndex(0);
+                    }}
+                  >
+                    Yearly
+                  </button>
+                </div>
+              </div>
+              <div className="flex gap-2 mb-3 flex-wrap justify-center">
+                {pieDataArr.map((period, idx) => (
+                  <button
+                    key={idx}
+                    className={`px-4 py-2 rounded-xl text-xs font-medium transition-all duration-300 shadow-sm ${
+                      piePeriodIndex === idx
+                        ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg shadow-slate-200/50 transform scale-105"
+                        : "bg-white/60 text-slate-700 hover:bg-white hover:shadow-md border border-slate-200/50"
+                    }`}
+                    onClick={() => setPiePeriodIndex(idx)}
+                  >
+                    {pieView === "monthly" ? period.month : period.year}
+                  </button>
+                ))}
+              </div>
+              <p className="text-slate-500 text-sm mb-4 text-center font-medium">
+                {pieView === "monthly"
+                  ? `Breakdown for ${pieLabel}`
+                  : `Breakdown for ${pieLabel}`}
+              </p>
+              {pieData.length === 0 ? (
+                <div className="text-gray-400 text-center py-12">
+                  No data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Tooltip
+                      formatter={(value, name) => {
+                        const total = pieData.reduce(
+                          (sum, item) => sum + item.value,
+                          0
+                        );
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return [
+                          `₹${value.toLocaleString()} (${percentage}%)`,
+                          name,
+                        ];
+                      }}
+                    />
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      label={false}
+                      activeIndex={activePieIndex}
+                    >
+                      {pieData.map((entry, idx) => (
+                        <Cell
+                          key={`cell-${idx}`}
+                          fill={pieColors[idx % pieColors.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Legend
+                      verticalAlign="bottom"
+                      height={36}
+                      iconType="circle"
+                      onClick={(_, idx) => setActivePieIndex(idx)}
+                      formatter={(value, entry, idx) => (
+                        <span
+                          className={`text-xs cursor-pointer ${
+                            activePieIndex === idx
+                              ? "font-bold text-blue-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {value}
+                        </span>
+                      )}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Weekly Trends Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1 h-8 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full shadow-sm"></div>
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+                Weekly Trends
+              </h2>
+              <p className="text-slate-500 text-sm font-medium">
+                Track your weekly financial patterns
+              </p>
+            </div>
+          </div>
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 shadow-2xl shadow-emerald-200/30 border border-white/50 hover:shadow-2xl hover:shadow-emerald-200/40 transition-all duration-500">
+            <div className="mb-4">
+              <h3 className="font-semibold text-lg bg-gradient-to-r from-slate-800 to-emerald-900 bg-clip-text text-transparent">
+                Weekly Financial Trends
+              </h3>
+              <p className="text-slate-500 text-sm font-medium">
+                Track your weekly income, expenses, and savings patterns
+              </p>
+            </div>
+            {metrics.weeklyTrends.length === 0 ? (
               <div className="text-gray-400 text-center py-12">
                 No data available
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={incomeExpenseData}>
-                  <XAxis
-                    dataKey={incomeExpenseView === "monthly" ? "month" : "year"}
-                    tick={{ fontSize: 12 }}
-                  />
+                <LineChart data={weeklyTrends}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="friendlyLabel" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip
                     formatter={(value, name) => [
@@ -306,192 +524,39 @@ const Dashboard = () => {
                       name,
                     ]}
                   />
-                  <Bar
+                  <Line
+                    type="monotone"
                     dataKey="expense"
-                    fill="#f87171"
-                    radius={[4, 4, 0, 0]}
+                    stroke="#f87171"
+                    strokeWidth={2}
                     name="Expense"
                   />
-                  <Bar
+                  <Line
+                    type="monotone"
                     dataKey="income"
-                    fill="#3b82f6"
-                    radius={[4, 4, 0, 0]}
+                    stroke="#3b82f6"
+                    strokeWidth={2}
                     name="Income"
                   />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-          <div className="bg-white rounded-xl p-6 shadow border border-gray-100 flex flex-col items-center justify-center">
-            <div className="flex items-center justify-between w-full mb-2">
-              <h2 className="font-semibold text-lg text-gray-800 mb-0">
-                Expense Categories
-              </h2>
-              <div className="flex gap-2">
-                <button
-                  className={`px-3 py-1 rounded text-xs font-semibold ${
-                    pieView === "monthly"
-                      ? "bg-blue-100 text-blue-600"
-                      : "bg-gray-100 text-gray-500"
-                  }`}
-                  onClick={() => {
-                    setPieView("monthly");
-                    setPiePeriodIndex(0);
-                  }}
-                >
-                  Monthly
-                </button>
-                <button
-                  className={`px-3 py-1 rounded text-xs font-semibold ${
-                    pieView === "yearly"
-                      ? "bg-blue-100 text-blue-600"
-                      : "bg-gray-100 text-gray-500"
-                  }`}
-                  onClick={() => {
-                    setPieView("yearly");
-                    setPiePeriodIndex(0);
-                  }}
-                >
-                  Yearly
-                </button>
-              </div>
-            </div>
-            <div className="flex gap-2 mb-2">
-              {pieDataArr.map((period, idx) => (
-                <button
-                  key={idx}
-                  className={`px-2 py-1 rounded text-xs font-medium border ${
-                    piePeriodIndex === idx
-                      ? "bg-blue-500 text-white border-blue-500"
-                      : "bg-gray-100 text-gray-700 border-gray-200"
-                  }`}
-                  onClick={() => setPiePeriodIndex(idx)}
-                >
-                  {pieView === "monthly" ? period.month : period.year}
-                </button>
-              ))}
-            </div>
-            <p className="text-gray-400 text-sm mb-2">
-              {pieView === "monthly"
-                ? `Breakdown for ${pieLabel}`
-                : `Breakdown for ${pieLabel}`}
-            </p>
-            {pieData.length === 0 ? (
-              <div className="text-gray-400 text-center py-12">
-                No data available
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <PieChart>
-                  <Tooltip
-                    formatter={(value, name) => {
-                      const total = pieData.reduce(
-                        (sum, item) => sum + item.value,
-                        0
-                      );
-                      const percentage = ((value / total) * 100).toFixed(1);
-                      return [
-                        `₹${value.toLocaleString()} (${percentage}%)`,
-                        name,
-                      ];
-                    }}
+                  <Line
+                    type="monotone"
+                    dataKey="savings"
+                    stroke="#22d3ee"
+                    strokeWidth={2}
+                    name="Savings"
                   />
-                  <Pie
-                    data={pieData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    label={false}
-                    activeIndex={activePieIndex}
-                  >
-                    {pieData.map((entry, idx) => (
-                      <Cell
-                        key={`cell-${idx}`}
-                        fill={pieColors[idx % pieColors.length]}
-                      />
-                    ))}
-                  </Pie>
                   <Legend
                     verticalAlign="bottom"
                     height={36}
                     iconType="circle"
-                    onClick={(_, idx) => setActivePieIndex(idx)}
-                    formatter={(value, entry, idx) => (
-                      <span
-                        className={`text-xs cursor-pointer ${
-                          activePieIndex === idx
-                            ? "font-bold text-blue-600"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {value}
-                      </span>
+                    formatter={(value) => (
+                      <span className="text-xs text-gray-500">{value}</span>
                     )}
                   />
-                </PieChart>
+                </LineChart>
               </ResponsiveContainer>
             )}
           </div>
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow border border-gray-100 mb-8">
-          <h2 className="font-semibold text-lg text-gray-800 mb-2">
-            Weekly Financial Trends
-          </h2>
-          <p className="text-gray-400 text-sm mb-4">
-            Track your weekly income, expenses, and savings patterns
-          </p>
-          {metrics.weeklyTrends.length === 0 ? (
-            <div className="text-gray-400 text-center py-12">
-              No data available
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={weeklyTrends}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="friendlyLabel" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip
-                  formatter={(value, name) => [
-                    `₹${value.toLocaleString()}`,
-                    name,
-                  ]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="expense"
-                  stroke="#f87171"
-                  strokeWidth={2}
-                  name="Expense"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="income"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  name="Income"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="savings"
-                  stroke="#22d3ee"
-                  strokeWidth={2}
-                  name="Savings"
-                />
-                <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  iconType="circle"
-                  formatter={(value) => (
-                    <span className="text-xs text-gray-500">{value}</span>
-                  )}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
         </div>
       </div>
     </div>

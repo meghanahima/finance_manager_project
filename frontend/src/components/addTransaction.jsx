@@ -275,9 +275,31 @@ const AddTransaction = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8">
-      <h1 className="text-3xl font-bold mb-8 text-blue-950">
-        Add New Transaction
-      </h1>
+      {/* Header Section */}
+      <div className="w-full max-w-2xl mb-8">
+        <div className="rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
+          {/* Subtle shine effects */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-center gap-4 mb-3">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
+                <span className="text-4xl filter drop-shadow-sm">➕</span>
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-3">
+                  Add New Transaction
+                </h1>
+                <p className="text-slate-700 text-lg font-medium flex items-center gap-2">
+                  <span className="inline-block w-1.5 h-1.5 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></span>
+                  Create new income or expense entries with ease
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-8">
         {/* Tabs */}
         <div className="flex mb-6 bg-gray-100 rounded-full p-1">
@@ -352,11 +374,33 @@ const AddTransaction = () => {
                   <button
                     key={cat.label}
                     type="button"
-                    className={`flex flex-col items-center justify-center p-3 rounded-lg border transition text-xs font-medium gap-1 ${
+                    className={`relative flex flex-col items-center justify-center p-3 rounded-lg transition-all duration-200 ease-out text-xs font-medium gap-1 cursor-pointer overflow-hidden ${
                       manualForm.category === cat.label
-                        ? "bg-blue-50 border-blue-400 text-blue-600"
-                        : "bg-white border-gray-200 text-gray-500"
+                        ? "bg-gray-50 scale-[1.02] shadow-md text-gray-900"
+                        : "bg-white border-2 border-gray-200 text-gray-500 hover:scale-105 hover:shadow-lg hover:-translate-y-1 hover:bg-gray-100 hover:text-gray-900"
                     }`}
+                    style={
+                      manualForm.category === cat.label
+                        ? {
+                            background: 'linear-gradient(#f3f4f6, #f3f4f6) padding-box, linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899) border-box',
+                            border: '2px solid transparent',
+                          }
+                        : {}
+                    }
+                    onMouseEnter={(e) => {
+                      if (manualForm.category !== cat.label) {
+                        e.target.style.background = 'linear-gradient(#f3f4f6, #f3f4f6) padding-box, linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899) border-box';
+                        e.target.style.border = '2px solid transparent';
+                        e.target.style.transform = "scale(1.05) translateY(-4px)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (manualForm.category !== cat.label) {
+                        e.target.style.background = "";
+                        e.target.style.border = "";
+                        e.target.style.transform = "";
+                      }
+                    }}
                     onClick={() =>
                       setManualForm((f) => ({ ...f, category: cat.label }))
                     }
@@ -431,7 +475,7 @@ const AddTransaction = () => {
 
             {/* Save Button */}
             <button
-              className="w-full py-3 rounded-xl bg-blue-500 text-white font-semi-bold text-lg shadow-md hover:bg-blue-600 transition cursor-pointer"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-200 to-purple-200 text-blue-800 font-semi-bold text-lg shadow-lg hover:from-blue-300 hover:to-purple-300 transform hover:scale-[1.02] transition-all duration-200 cursor-pointer"
               type="button"
               onClick={saveManualTransaction}
               disabled={saving}
@@ -628,7 +672,7 @@ const AddTransaction = () => {
                 </div>
               )}
               <button
-                className="w-full py-3 rounded-xl bg-purple-500 text-white font-semi-bold text-lg shadow-md hover:bg-purple-600 transition cursor-pointer disabled:bg-gray-400"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-200 to-pink-200 text-purple-800 font-semi-bold text-lg shadow-lg hover:from-purple-300 hover:to-pink-300 transform hover:scale-[1.02] transition-all duration-200 cursor-pointer disabled:bg-gray-400"
                 type="button"
                 onClick={saveUploadTransaction}
                 disabled={

@@ -70,13 +70,15 @@ const LoginPage = () => {
     <div className="w-full min-h-screen flex flex-col lg:flex-row">
       {/* Left/Form side */}
       <div className="flex-1 flex flex-col justify-center items-center p-4 sm:p-8 bg-white lg:bg-white">
-        <div className="flex justify-center items-center gap-3 mb-2">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-teal-400 to-teal-600">
-            <BarChart3 className="w-7 h-7 text-white" />
+        <div className="flex justify-center items-center gap-4 mb-2">
+          <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg shadow-teal-100/50 border border-white/30">
+            <span className="text-3xl filter drop-shadow-sm">🔐</span>
           </div>
-          <h2 className="font-bold bg-gradient-to-r from-teal-600 to-teal-800 bg-clip-text text-transparent text-2xl sm:text-3xl">
-            FinanceAssistant
-          </h2>
+          <div>
+            <h2 className="font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent text-xl sm:text-2xl">
+              FinanceAssistant
+            </h2>
+          </div>
         </div>
         <p className="py-5 text-center text-gray-600">
           {isLogin

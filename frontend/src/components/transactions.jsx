@@ -26,11 +26,6 @@ const incomeCategories = [
   { label: "Other", icon: "📦" },
 ];
 
-const typeColors = {
-  Income: "bg-green-50 border border-green-600 text-green-600",
-  Expense: "bg-red-50 border border-red-600 text-red-600",
-};
-
 const typeIcons = {
   Income: <span className="text-3xl">💵</span>,
   Expense: <span className="text-3xl">🧾</span>,
@@ -330,78 +325,113 @@ const Transactions = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8">
       {/* Header Section */}
-      <div className="w-full max-w-5xl mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2 text-blue-950">
-          Transaction Management 📊
-        </h1>
-        <p className="text-gray-600 mb-6">
-          View, filter, and manage all your transactions with ease
-        </p>
-      </div>
-      {/*Filters */}
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">Filters</h2>
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <label className="block text-gray-700 font-medium mb-1">Type</label>
-            <CustomSelect
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-            >
-              <option value="All">All Types</option>
-              <option value="Income">Income</option>
-              <option value="Expense">Expense</option>
-            </CustomSelect>
-          </div>
-          <div className="flex-1">
-            <label className="block text-gray-700 font-medium mb-1">
-              Category
-            </label>
-            <CustomCategorySelect
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              typeFilter={typeFilter}
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-gray-700 font-medium mb-1">
-              From Date
-            </label>
-            <CustomDate
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-gray-700 font-medium mb-1">
-              To Date
-            </label>
-            <CustomDate
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+      <div className="w-full max-w-5xl mb-8">
+        <div className="rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
+          {/* Subtle shine effects */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-center gap-4 mb-3">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
+                <span className="text-4xl filter drop-shadow-sm">📊</span>
+              </div>
+              <div className="text-center">
+                <h1 className="text-3xl md:text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-3">
+                  Transaction Management
+                </h1>
+                <p className="text-slate-700 text-lg font-medium flex items-center justify-center gap-2">
+                  <span className="inline-block w-1.5 h-1.5 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></span>
+                  View, filter, and manage all your transactions with ease
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      
+
+      {/* Filters Section */}
+      <div className="w-full max-w-5xl mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
+          <div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+              Filters
+            </h2>
+            <p className="text-slate-500 text-sm font-medium">
+              Customize your transaction view
+            </p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl shadow p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <label className="block text-gray-700 font-medium mb-1">Type</label>
+              <CustomSelect
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+              >
+                <option value="All">All Types</option>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+              </CustomSelect>
+            </div>
+            <div className="flex-1">
+              <label className="block text-gray-700 font-medium mb-1">
+                Category
+              </label>
+              <CustomCategorySelect
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                typeFilter={typeFilter}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-gray-700 font-medium mb-1">
+                From Date
+              </label>
+              <CustomDate
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-gray-700 font-medium mb-1">
+                To Date
+              </label>
+              <CustomDate
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Financial Summary Section */}
       <div className="w-full max-w-5xl mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-1 h-8 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full shadow-sm"></div>
+          <div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+              Financial Summary
+            </h2>
+            <p className="text-slate-500 text-sm font-medium">
+              {hasActiveFilters
+                ? "Totals based on your current filter selection"
+                : "Totals for all your transactions"}
+            </p>
+          </div>
+        </div>
         <div className="bg-white rounded-2xl shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Financial Summary</h2>
-              <p className="text-sm text-gray-600">
-                {hasActiveFilters 
-                  ? "Totals based on your current filter selection"
-                  : "Totals for all your transactions"
-                }
-              </p>
-            </div>
-            <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              hasActiveFilters 
-                ? "bg-blue-100 text-blue-700" 
-                : "bg-gray-100 text-gray-700"
-            }`}>
+            <div
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                hasActiveFilters
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
               {hasActiveFilters ? "Filtered Data" : "All Transactions"}
             </div>
           </div>
@@ -411,7 +441,9 @@ const Transactions = () => {
               value={
                 totalIncome === 0 ? `₹ 0` : `₹ ${totalIncome.toLocaleString()}`
               }
-              subText={hasActiveFilters ? "Based on filters applied" : "All time total"}
+              subText={
+                hasActiveFilters ? "Based on filters applied" : "All time total"
+              }
               icon={typeIcons.Income}
               bgColor="bg-green-50"
               textColor="text-teal-900"
@@ -419,9 +451,13 @@ const Transactions = () => {
             <StatCard
               title="Total Expenses"
               value={
-                totalExpenses === 0 ? `₹ 0` : `₹ ${totalExpenses.toLocaleString()}`
+                totalExpenses === 0
+                  ? `₹ 0`
+                  : `₹ ${totalExpenses.toLocaleString()}`
               }
-              subText={hasActiveFilters ? "Based on filters applied" : "All time total"}
+              subText={
+                hasActiveFilters ? "Based on filters applied" : "All time total"
+              }
               icon={typeIcons.Expense}
               bgColor="bg-red-50"
               textColor="text-red-800"
@@ -429,7 +465,11 @@ const Transactions = () => {
             <StatCard
               title="Net Balance"
               value={`₹ ${netBalance.toLocaleString()}`}
-              subText={hasActiveFilters ? "Based on filters applied" : "All time balance"}
+              subText={
+                hasActiveFilters
+                  ? "Based on filters applied"
+                  : "All time balance"
+              }
               icon={typeIcons.Balance}
               bgColor="bg-violet-50"
               textColor="text-violet-900"
@@ -438,96 +478,159 @@ const Transactions = () => {
         </div>
       </div>
 
-      {/* Transaction History Table */}
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold mb-2 text-gray-800">
-          Transaction History
-        </h1>
-        <p className="mb-6 text-gray-500">
-          Showing {transactions.length} of {totalCount} transactions
-        </p>
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
+      {/* Transaction History Section */}
+      <div className="w-full max-w-5xl mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-1 h-8 bg-gradient-to-b from-slate-500 to-slate-600 rounded-full shadow-sm"></div>
+          <div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+              Transaction History
+            </h2>
+            <p className="text-slate-500 text-sm font-medium">
+              Showing {transactions.length} of {totalCount} transactions
+            </p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 font-medium">Error: {error}</p>
+          </div>
+        )}
+
+        <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
           <table className="min-w-full text-sm bg-white rounded-xl">
             <thead>
-              <tr className="bg-gray-100 text-gray-700">
-                <th className="py-3 px-4 text-left">Date</th>
-                <th className="py-3 px-4 text-left">Type</th>
-                <th className="py-3 px-4 text-left">Category</th>
-                <th className="py-3 px-4 text-right">Amount</th>
-                <th className="py-3 px-4 text-left">Description</th>
-                <th className="py-3 px-4 text-center">Actions</th>
+              <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                <th className="py-4 px-6 text-left font-semibold text-slate-700">
+                  Date
+                </th>
+                <th className="py-4 px-6 text-left font-semibold text-slate-700">
+                  Type
+                </th>
+                <th className="py-4 px-6 text-left font-semibold text-slate-700">
+                  Category
+                </th>
+                <th className="py-4 px-6 text-right font-semibold text-slate-700">
+                  Amount
+                </th>
+                <th className="py-4 px-6 text-left font-semibold text-slate-700">
+                  Description
+                </th>
+                <th className="py-4 px-6 text-center font-semibold text-slate-700">
+                  Actions
+                </th>
               </tr>
             </thead>
-            <tbody>
-              {transactions.map((t, idx) => (
-                <tr
-                  key={idx}
-                  className="border-b-gray-200 last:border-b-0 hover:bg-gray-50 transition"
-                >
-                  <td className="py-2 px-4 font-medium text-gray-700">
-                    {t.dateOfTransaction
-                      ? new Date(t.dateOfTransaction).toString() !==
-                        "Invalid Date"
-                        ? new Date(t.dateOfTransaction).toLocaleDateString(
-                            "en-US",
-                            { month: "short", day: "2-digit", year: "numeric" }
-                          )
-                        : "-"
-                      : "-"}
-                  </td>
-                  <td className="py-2 px-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        typeColors[t.type]
-                      }`}
-                    >
-                      {t.type}
-                    </span>
-                  </td>
-                  <td className="py-2 px-4 text-gray-700">{t.category}</td>
-                  <td
-                    className={`py-2 px-4 text-right font-bold ${
-                      t.type === "Income" ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    ₹ {Math.abs(t.amount).toFixed(2)}
-                  </td>
-                  <td className="py-2 px-4 text-gray-600">
-                    {t.description || "-"}
-                  </td>
-                  <td className="py-2 px-4 text-center">
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        className="h-8 w-8 flex items-center justify-center hover:bg-blue-100 rounded-lg transition-colors"
-                        onClick={() => handleEditTransaction(t)}
-                        title="Edit transaction"
-                      >
-                        <Edit className="h-4 w-4 text-blue-600" />
-                      </button>
-                      <button
-                        className="h-8 w-8 flex items-center justify-center hover:bg-red-100 rounded-lg transition-colors"
-                        onClick={() => handleDeleteTransaction(t._id)}
-                        title="Delete transaction"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </button>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="py-12 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                      <p className="text-slate-500">Loading transactions...</p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : transactions.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="py-12 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <HandCoins className="h-12 w-12 text-slate-300" />
+                      <p className="text-slate-500 font-medium">
+                        No transactions found
+                      </p>
+                      <p className="text-slate-400 text-sm">
+                        Try adjusting your filters or add some transactions
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                transactions.map((t, idx) => (
+                  <tr
+                    key={idx}
+                    className="hover:bg-slate-50/50 transition-colors duration-150 group"
+                  >
+                    <td className="py-4 px-6 font-medium text-slate-700 border-l-4 border-transparent group-hover:border-l-slate-200">
+                      {t.dateOfTransaction
+                        ? new Date(t.dateOfTransaction).toString() !==
+                          "Invalid Date"
+                          ? new Date(t.dateOfTransaction).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "2-digit",
+                                year: "numeric",
+                              }
+                            )
+                          : "-"
+                        : "-"}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span
+                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm ${
+                          t.type === "Income"
+                            ? "bg-teal-500 text-white"
+                            : "bg-orange-500 text-white"
+                        }`}
+                      >
+                        {t.type}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-slate-600 font-medium">
+                      {t.category}
+                    </td>
+                    <td className="py-4 px-6 text-right">
+                      <span
+                        className={`font-bold text-lg ${
+                          t.type === "Income"
+                            ? "text-emerald-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {t.type === "Income" ? "+" : "-"}₹
+                        {Math.abs(t.amount).toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-slate-500 max-w-xs truncate">
+                      {t.description || "-"}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          className="h-9 w-9 flex items-center justify-center hover:bg-blue-50 rounded-lg transition-all duration-200 group/btn border border-transparent hover:border-blue-200"
+                          onClick={() => handleEditTransaction(t)}
+                          title="Edit transaction"
+                        >
+                          <Edit className="h-4 w-4 text-blue-600 group-hover/btn:scale-110 transition-transform" />
+                        </button>
+                        <button
+                          className="h-9 w-9 flex items-center justify-center hover:bg-red-50 rounded-lg transition-all duration-200 group/btn border border-transparent hover:border-red-200"
+                          onClick={() => handleDeleteTransaction(t._id)}
+                          title="Delete transaction"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600 group-hover/btn:scale-110 transition-transform" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
-          <span className="text-gray-500">
-            Page {page} of {totalPages} transactions
+        <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-100">
+          <span className="text-slate-500 font-medium">
+            Page {page} of {totalPages} • {totalCount} total transactions
           </span>
           <div className="flex gap-2">
             {page > 1 && (
               <button
                 onClick={() => setPage(page - 1)}
-                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200"
               >
                 Previous
               </button>
@@ -544,10 +647,10 @@ const Transactions = () => {
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`px-3 py-1 rounded font-semibold border cursor-pointer ${
+                  className={`px-4 py-2 rounded-lg font-semibold border transition-colors duration-200 ${
                     p === page
-                      ? "bg-blue-500 text-white border-blue-500"
-                      : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
+                      ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
                   }`}
                 >
                   {p}
@@ -556,7 +659,7 @@ const Transactions = () => {
             {page < totalPages && (
               <button
                 onClick={() => setPage(page + 1)}
-                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200"
               >
                 Next
               </button>
@@ -581,6 +684,8 @@ const Transactions = () => {
           </div>
         </div>
       )}
+    </div>
+  );
     </div>
   );
 };
