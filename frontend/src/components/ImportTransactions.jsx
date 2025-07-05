@@ -8,7 +8,7 @@ import {
   Info,
   Copy,
 } from "lucide-react";
-import Papa from "papaparse";
+import * as XLSX from "xlsx";
 import { getUserId } from "../utilities/auth.js";
 
 const expenseCategories = [
@@ -43,91 +43,150 @@ const ImportTransactions = () => {
 
   const handleFileSelect = (event) => {
     const selectedFile = event.target.files[0];
-    if (selectedFile && selectedFile.type === "text/csv") {
-      setFile(selectedFile);
-      setError("");
-      parseCSVPreview(selectedFile);
-    } else {
-      setError("Please select a valid CSV file");
-      setFile(null);
-      setPreviewData([]);
-      setShowPreview(false);
-    }
-  };
+    if (selectedFile) {
+      const fileExtension = selectedFile.name.split(".").pop().toLowerCase();
+      const validExtensions = ["xlsx", "xls"];
 
-  const parseCSVPreview = (file) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        if (results.data && results.data.length > 0) {
-          setPreviewData(results.data.slice(0, 5)); // Show first 5 rows for preview
-          setShowPreview(true);
-        }
-      },
-      error: (error) => {
-        setError("Error parsing CSV file: " + error.message);
-      },
-    });
-  };
-
-  const copyTemplateToClipboard = async () => {
-    try {
-      const template = [
-        {
-          amount: "100.00",
-          type: "Income",
-          category: "Salary",
-          description: "Monthly salary payment",
-          date: "2025-01-15",
-        },
-        {
-          amount: "50.00",
-          type: "Expense",
-          category: "Food & Dining",
-          description: "Lunch at restaurant",
-          date: "2025-01-14",
-        },
-        {
-          amount: "25.99",
-          type: "Expense",
-          category: "Transportation",
-          description: "",
-          date: "",
-        },
-      ];
-
-      const csv = Papa.unparse(template);
-
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(csv);
-        setResults({
-          success: true,
-          message:
-            "Template copied to clipboard! You can paste it into a spreadsheet application like Excel or Google Sheets.",
-        });
+      if (validExtensions.includes(fileExtension)) {
+        setFile(selectedFile);
+        setError("");
+        parseFilePreview(selectedFile);
       } else {
-        // Fallback for older browsers
-        const textArea = document.createElement("textarea");
-        textArea.value = csv;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        setResults({
-          success: true,
-          message:
-            "Template copied to clipboard! You can paste it into a spreadsheet application.",
-        });
+        setError("Please select a valid Excel file (.xlsx, .xls)");
+        setFile(null);
+        setPreviewData([]);
+        setShowPreview(false);
       }
-
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setResults(null);
-      }, 3000);
-    } catch (err) {
-      setError("Failed to copy template: " + err.message);
     }
+  };
+
+  const parseFilePreview = (file) => {
+    // Handle Excel files
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        if (jsonData.length > 1) {
+          // Convert to object format with headers
+          const headers = jsonData[0];
+          const rows = jsonData.slice(1).map((row) => {
+            const obj = {};
+            headers.forEach((header, index) => {
+              obj[header] = row[index] || "";
+            });
+            return obj;
+          });
+
+          setPreviewData(rows.slice(0, 5)); // Show first 5 rows for preview
+          setShowPreview(true);
+        } else {
+          setError("Excel file appears to be empty or has no data rows");
+        }
+      } catch (error) {
+        setError("Error parsing Excel file: " + error.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const downloadExcelTemplate = () => {
+    // Demo transaction template
+    const template = [
+      {
+        amount: "100.00",
+        type: "Income",
+        category: "Salary",
+        description: "Monthly salary payment",
+        date: "2025-01-15",
+      },
+    ];
+
+    // Create Excel workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(template);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
+
+    // Generate Excel file as a Blob
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    // Create a download link and trigger download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "transaction-template.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadSampleExcel = () => {
+    const template = [
+      {
+        amount: "100.00",
+        type: "Income",
+        category: "Salary",
+        description: "Monthly salary payment",
+        date: "2025-01-15",
+      },
+      {
+        amount: "50.00",
+        type: "Expense",
+        category: "Food & Dining",
+        description: "Lunch at restaurant",
+        date: "2025-01-14",
+      },
+      {
+        amount: "25.99",
+        type: "Expense",
+        category: "Transportation",
+        description: "Bus ticket",
+        date: "2025-01-13",
+      },
+      {
+        amount: "200.00",
+        type: "Income",
+        category: "Freelance",
+        description: "Web development project",
+        date: "2025-01-12",
+      },
+      {
+        amount: "75.50",
+        type: "Expense",
+        category: "Shopping",
+        description: "Clothing purchase",
+        date: "2025-01-11",
+      },
+    ];
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(template);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sample-transactions.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const validateData = (data) => {
@@ -135,11 +194,20 @@ const ImportTransactions = () => {
     const validationErrors = [];
     const validRows = [];
 
-    // Check if required columns exist
+    // Check if data is empty
     if (data.length === 0) {
-      return { errors: ["CSV file is empty"], validRows: [] };
+      return { errors: ["File is empty"], validRows: [] };
     }
 
+    // Check maximum transactions limit
+    if (data.length > 50) {
+      validationErrors.push(
+        `Maximum 50 transactions allowed. Found ${data.length} transactions.`
+      );
+      return { errors: validationErrors, validRows: [] };
+    }
+
+    // Check if required columns exist
     const headers = Object.keys(data[0]);
     const missingColumns = requiredColumns.filter(
       (col) => !headers.includes(col)
@@ -212,85 +280,118 @@ const ImportTransactions = () => {
     return { errors: validationErrors, validRows };
   };
 
+  const parseFileData = (file) => {
+    return new Promise((resolve, reject) => {
+      // Handle Excel files
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          if (jsonData.length > 1) {
+            // Convert to object format with headers
+            const headers = jsonData[0];
+            const rows = jsonData.slice(1).map((row) => {
+              const obj = {};
+              headers.forEach((header, index) => {
+                obj[header] = row[index] || "";
+              });
+              return obj;
+            });
+
+            resolve(rows);
+          } else {
+            reject(
+              new Error("Excel file appears to be empty or has no data rows")
+            );
+          }
+        } catch (error) {
+          reject(new Error("Error parsing Excel file: " + error.message));
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
   const handleImport = async () => {
     if (!file) {
-      setError("Please select a CSV file");
+      setError("Please select an Excel file");
       return;
     }
 
     setLoading(true);
     setError("");
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async (results) => {
-        try {
-          const { errors, validRows } = validateData(results.data);
+    try {
+      const data = await parseFileData(file);
+      const { errors, validRows } = validateData(data);
 
-          if (errors.length > 0) {
-            setError(errors.join("\n"));
-            setLoading(false);
-            return;
-          }
-
-          if (validRows.length === 0) {
-            setError("No valid transactions found in the CSV file");
-            setLoading(false);
-            return;
-          }
-
-          // Import valid transactions
-          const userId = getUserId();
-          if (!userId) {
-            setError("Please log in to import transactions");
-            setLoading(false);
-            return;
-          }
-
-          const response = await fetch(
-            "http://localhost:5000/api/transactions/import",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                userId,
-                transactions: validRows,
-              }),
-            }
-          );
-
-          const data = await response.json();
-
-          if (response.ok) {
-            setResults({
-              success: data.success,
-              total: validRows.length,
-              imported: data.imported,
-              failed: data.failed || 0,
-            });
-            setFile(null);
-            setShowPreview(false);
-            setPreviewData([]);
-            // Reset file input
-            const fileInput = document.getElementById("csv-file");
-            if (fileInput) fileInput.value = "";
-          } else {
-            setError(data.message || "Failed to import transactions");
-          }
-        } catch (err) {
-          setError("Error importing transactions: " + err.message);
-        } finally {
-          setLoading(false);
-        }
-      },
-      error: (error) => {
-        setError("Error parsing CSV: " + error.message);
+      if (errors.length > 0) {
+        setError(errors.join("\n"));
         setLoading(false);
-      },
-    });
+        return;
+      }
+
+      if (validRows.length === 0) {
+        setError("No valid transactions found in the file");
+        setLoading(false);
+        return;
+      }
+
+      // Import valid transactions
+      const userId = getUserId();
+      if (!userId) {
+        setError("Please log in to import transactions");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/transaction/import",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            transactions: validRows,
+          }),
+        }
+      );
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        setResults({
+          success: responseData.success,
+          total: validRows.length,
+          imported: responseData.imported,
+          failed: responseData.failed || 0,
+        });
+        setFile(null);
+        setShowPreview(false);
+        setPreviewData([]);
+        // Reset file input
+        const fileInput = document.getElementById("file-upload");
+        if (fileInput) fileInput.value = "";
+
+        // Clear success message after 2 seconds
+        setTimeout(() => {
+          setResults(null);
+        }, 2000);
+      } else {
+        setError(responseData.message || "Failed to import transactions");
+      }
+    } catch (err) {
+      setError("Error importing transactions: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -304,13 +405,13 @@ const ImportTransactions = () => {
             </h1>
           </div>
 
-          {/* CSV Format Guide */}
+          {/* File Format Guide */}
           <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start">
               <Info className="h-6 w-6 text-blue-600 mr-3 mt-1 flex-shrink-0" />
               <div>
                 <h3 className="text-lg font-semibold text-blue-900 mb-3">
-                  CSV Format Requirements
+                  Excel Format Requirements
                 </h3>
 
                 <div className="space-y-4">
@@ -389,6 +490,14 @@ const ImportTransactions = () => {
                       as "Other".
                     </p>
                   </div>
+
+                  <div className="bg-orange-50 border border-orange-200 rounded p-3">
+                    <p className="text-orange-800 text-sm">
+                      <strong>Important:</strong> Maximum 50 transactions
+                      allowed per import. Supported file formats: Excel (.xlsx,
+                      .xls).
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -396,13 +505,20 @@ const ImportTransactions = () => {
 
           {/* Download Template */}
           <div className="mb-8">
-            <div className="flex flex-col">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={copyTemplateToClipboard}
+                onClick={downloadExcelTemplate}
                 className="flex items-center px-6 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-fit"
               >
                 <Copy className="h-5 w-5 mr-2" />
-                Copy CSV Template to Clipboard
+                Download Excel Template
+              </button>
+              <button
+                onClick={downloadSampleExcel}
+                className="flex items-center px-6 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors w-fit"
+              >
+                <Download className="h-5 w-5 mr-2" />
+                Try with sample document (5 transactions)
               </button>
             </div>
           </div>
@@ -410,26 +526,26 @@ const ImportTransactions = () => {
           {/* File Upload */}
           <div className="mb-8">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload CSV File
+              Upload Excel File
             </label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-400 transition-colors">
               <input
-                id="csv-file"
+                id="file-upload"
                 type="file"
-                accept=".csv"
+                accept=".xlsx, .xls"
                 onChange={handleFileSelect}
                 className="hidden"
               />
               <label
-                htmlFor="csv-file"
+                htmlFor="file-upload"
                 className="cursor-pointer flex flex-col items-center"
               >
                 <FileText className="h-12 w-12 text-gray-400 mb-4" />
                 <span className="text-lg font-medium text-gray-700 mb-2">
-                  Click to upload CSV file
+                  Click to upload Excel file
                 </span>
                 <span className="text-sm text-gray-500">
-                  Only CSV files are accepted
+                  Only Excel files are accepted
                 </span>
               </label>
             </div>
@@ -503,21 +619,10 @@ const ImportTransactions = () => {
 
           {/* Results Display */}
           {results && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-start">
-                <CheckCircle className="h-5 w-5 text-green-600 mr-2 mt-0.5" />
-                <div>
-                  <h3 className="text-sm font-medium text-green-800 mb-1">
-                    Import Successful
-                  </h3>
-                  <p className="text-sm text-green-700">
-                    Successfully imported {results.imported} out of{" "}
-                    {results.total} transactions.
-                    {results.failed > 0 &&
-                      ` ${results.failed} transactions failed to import.`}
-                  </p>
-                </div>
-              </div>
+            <div className="mb-6">
+              <p className="text-sm text-green-600 font-medium">
+                Import Successful
+              </p>
             </div>
           )}
 

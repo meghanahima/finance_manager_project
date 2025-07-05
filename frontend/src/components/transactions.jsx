@@ -329,6 +329,12 @@ const Transactions = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8">
+      <div className="flex items-center mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 mr-4">Transactions</h1>
+        <span className="text-xs text-gray-500 font-medium bg-gray-100 px-2 py-1 rounded">
+          Overall
+        </span>
+      </div>
       {/*Filters */}
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow p-6 mb-8">
         <h2 className="text-lg font-semibold mb-4 text-gray-800">Filters</h2>
@@ -490,29 +496,23 @@ const Transactions = () => {
             Page {page} of {totalPages} transactions
           </span>
           <div className="flex gap-2">
-            <button
-              className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700"
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
-            >
-              Previous
-            </button>
-            {[...Array(totalPages)].map((_, i) => (
+            {page > 1 && (
               <button
-                key={i}
-                className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700"
-                onClick={() => setPage(i + 1)}
+                onClick={() => setPage(page - 1)}
+                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer"
               >
-                {i + 1}
+                Previous
               </button>
-            ))}
-            <button
-              className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700"
-              onClick={() => setPage(page + 1)}
-              disabled={page === totalPages}
-            >
-              Next
-            </button>
+            )}
+            <span>Page {page}</span>
+            {page < totalPages && (
+              <button
+                onClick={() => setPage(page + 1)}
+                className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer"
+              >
+                Next
+              </button>
+            )}
           </div>
         </div>
       </div>

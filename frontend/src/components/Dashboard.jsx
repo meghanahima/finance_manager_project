@@ -35,6 +35,8 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [activePieIndex, setActivePieIndex] = useState(null);
   const [incomeExpenseView, setIncomeExpenseView] = useState("monthly");
+  const [pieView, setPieView] = useState("monthly");
+  const [piePeriodIndex, setPiePeriodIndex] = useState(0);
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -60,6 +62,19 @@ const Dashboard = () => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch metrics");
         setMetrics(data.data);
+        if (data.data) {
+          if (
+            pieView === "monthly" &&
+            data.data.expenseCategoriesMonthly.length > 0
+          ) {
+            setPiePeriodIndex(data.data.expenseCategoriesMonthly.length - 1);
+          } else if (
+            pieView === "yearly" &&
+            data.data.expenseCategoriesYearly.length > 0
+          ) {
+            setPiePeriodIndex(data.data.expenseCategoriesYearly.length - 1);
+          }
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -69,6 +84,18 @@ const Dashboard = () => {
     fetchMetrics();
   }, []);
 
+  useEffect(() => {
+    if (!metrics) return;
+    if (pieView === "monthly" && metrics.expenseCategoriesMonthly.length > 0) {
+      setPiePeriodIndex(metrics.expenseCategoriesMonthly.length - 1);
+    } else if (
+      pieView === "yearly" &&
+      metrics.expenseCategoriesYearly.length > 0
+    ) {
+      setPiePeriodIndex(metrics.expenseCategoriesYearly.length - 1);
+    }
+  }, [pieView, metrics]);
+
   if (loading)
     return (
       <div className="p-8 text-center text-gray-500">Loading dashboard...</div>
@@ -76,134 +103,134 @@ const Dashboard = () => {
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
   if (!metrics) return null;
 
+  // Use backend-provided last 4 periods directly
   const incomeExpenseData =
     incomeExpenseView === "monthly"
       ? metrics.incomeExpenseData
       : metrics.yearlyIncomeExpenseData;
 
-  // Calculate monthly comparisons for Income and Expenses (always use monthly)
-  const lastMonthIdx = new Date().getMonth() - 1;
-  const thisMonthIdx = new Date().getMonth();
+  // Pie chart data and label
+  const pieDataArr =
+    pieView === "monthly"
+      ? metrics.expenseCategoriesMonthly
+      : metrics.expenseCategoriesYearly;
+  const piePeriod = pieDataArr[piePeriodIndex] || {};
+  const pieData = piePeriod.categories || [];
+  const pieLabel = pieView === "monthly" ? piePeriod.month : piePeriod.year;
 
-  const lastMonthData = metrics.incomeExpenseData?.[lastMonthIdx];
-  const thisMonthData = metrics.incomeExpenseData?.[thisMonthIdx];
+  // Stat card logic
+  const getStatChange = (data, key) => {
+    if (!data || data.length < 2) return null;
+    const prev = data[data.length - 2]?.[key] || 0;
+    const curr = data[data.length - 1]?.[key] || 0;
+    if (prev > 0) {
+      const change = (((curr - prev) / prev) * 100).toFixed(1);
+      return {
+        change: Math.abs(change),
+        isIncrease: curr > prev,
+        isDecrease: curr < prev,
+        show: true,
+      };
+    }
+    return { show: false };
+  };
 
-  const prevMonthIncome = lastMonthData?.income || 0;
-  const currMonthIncome = thisMonthData?.income || 0;
-  const prevMonthExpense = lastMonthData?.expense || 0;
-  const currMonthExpense = thisMonthData?.expense || 0;
+  const incomeChange = getStatChange(metrics.incomeExpenseData, "income");
+  const expenseChange = getStatChange(metrics.incomeExpenseData, "expense");
+  const netChange = getStatChange(metrics.yearlyIncomeExpenseData, "income");
 
-  // Calculate yearly comparison for Net Balance (always use yearly)
-  const years = metrics.yearlyIncomeExpenseData?.map((y) => y.year) || [];
-  const lastYear = years[years.length - 2];
-  const thisYear = years[years.length - 1];
-
-  const lastYearData = metrics.yearlyIncomeExpenseData?.find(
-    (y) => y.year === lastYear
-  );
-  const thisYearData = metrics.yearlyIncomeExpenseData?.find(
-    (y) => y.year === thisYear
-  );
-
-  const prevYearNet = lastYearData
-    ? lastYearData.income - lastYearData.expense
-    : 0;
-  const currYearNet = thisYearData
-    ? thisYearData.income - thisYearData.expense
-    : 0;
-
-  // Calculate percentage changes
-  const incomeChange =
-    prevMonthIncome > 0 && currMonthIncome >= 0
-      ? (((currMonthIncome - prevMonthIncome) / prevMonthIncome) * 100).toFixed(
-          1
-        )
-      : null;
-
-  const expenseChange =
-    prevMonthExpense > 0 && currMonthExpense >= 0
-      ? (
-          ((currMonthExpense - prevMonthExpense) / prevMonthExpense) *
-          100
-        ).toFixed(1)
-      : null;
-
-  const netChange =
-    prevYearNet !== 0 && currYearNet !== undefined
-      ? (((currYearNet - prevYearNet) / Math.abs(prevYearNet)) * 100).toFixed(1)
-      : null;
+  // Get this month's data
+  const thisMonthData = metrics.incomeExpenseData.at(-1) || {
+    income: 0,
+    expense: 0,
+  };
+  const thisMonthIncome = thisMonthData.income || 0;
+  const thisMonthExpense = thisMonthData.expense || 0;
+  const thisMonthNet = thisMonthIncome - thisMonthExpense;
 
   const statCards = [
     {
       title: "Total Income💵",
-      value: `₹${metrics.totalIncome.toLocaleString()}`,
+      value: `₹${thisMonthIncome.toLocaleString()}`,
+      label: "This Month",
       icon: <ArrowUpRight className="h-6 w-6 text-green-500" />,
       bgColor: "bg-green-50",
       textColor: "text-green-900",
-      subText: incomeExpenseData.every((d) => d.income === 0 && d.expense === 0)
-        ? null
-        : incomeChange !== null
-        ? `${incomeChange > 0 ? "+" : ""}${incomeChange}% from last ${
-            incomeExpenseView === "monthly" ? "month" : "year"
-          }`
-        : null,
-      subTextColor: incomeExpenseData.every(
-        (d) => d.income === 0 && d.expense === 0
-      )
-        ? "text-gray-500"
-        : incomeChange !== null
-        ? incomeChange > 0
-          ? "text-green-500"
-          : incomeChange < 0
-          ? "text-red-500"
-          : "text-gray-500"
-        : "text-gray-500",
+      subText:
+        incomeChange && incomeChange.show
+          ? `${
+              incomeChange.isIncrease ? "▲" : incomeChange.isDecrease ? "▼" : ""
+            } ${incomeChange.change}% from last month`
+          : null,
+      subTextColor:
+        incomeChange && incomeChange.show
+          ? incomeChange.isIncrease
+            ? "text-green-500"
+            : incomeChange.isDecrease
+            ? "text-red-500"
+            : "text-gray-500"
+          : "text-gray-500",
     },
     {
       title: "Total Expenses🧾",
-      value: `₹${metrics.totalExpenses.toLocaleString()}`,
+      value: `₹${thisMonthExpense.toLocaleString()}`,
+      label: "This Month",
       icon: <ArrowDownRight className="h-6 w-6 text-red-500" />,
       bgColor: "bg-red-50",
       textColor: "text-red-700",
-      subText: incomeExpenseData.every((d) => d.income === 0 && d.expense === 0)
-        ? null
-        : expenseChange !== null
-        ? `${expenseChange > 0 ? "+" : ""}${expenseChange}% from last ${
-            incomeExpenseView === "monthly" ? "month" : "year"
-          }`
-        : null,
-      subTextColor: incomeExpenseData.every(
-        (d) => d.income === 0 && d.expense === 0
-      )
-        ? "text-gray-500"
-        : expenseChange !== null
-        ? expenseChange > 0
-          ? "text-red-500"
-          : expenseChange < 0
-          ? "text-green-500"
-          : "text-gray-500"
-        : "text-gray-500",
+      subText:
+        expenseChange && expenseChange.show
+          ? `${
+              expenseChange.isIncrease
+                ? "▲"
+                : expenseChange.isDecrease
+                ? "▼"
+                : ""
+            } ${expenseChange.change}% from last month`
+          : null,
+      subTextColor:
+        expenseChange && expenseChange.show
+          ? expenseChange.isIncrease
+            ? "text-red-500"
+            : expenseChange.isDecrease
+            ? "text-green-500"
+            : "text-gray-500"
+          : "text-gray-500",
     },
     {
       title: "Net Balance💰",
-      value: `₹${metrics.netSavings.toLocaleString()}`,
+      value: `₹${thisMonthNet.toLocaleString()}`,
+      label: "This Month",
       icon: <DollarSign className="h-6 w-6 text-blue-500" />,
       bgColor: "bg-violet-50",
       textColor: "text-violet-900",
       subText:
-        netChange !== null
-          ? `${netChange > 0 ? "+" : ""}${netChange}% from last ${
-              incomeExpenseView === "monthly" ? "month" : "year"
-            }`
+        netChange && netChange.show
+          ? `${netChange.isIncrease ? "▲" : netChange.isDecrease ? "▼" : ""} ${
+              netChange.change
+            }% from last year`
           : null,
       subTextColor:
-        netChange > 0
-          ? "text-blue-500"
-          : netChange < 0
-          ? "text-red-500"
+        netChange && netChange.show
+          ? netChange.isIncrease
+            ? "text-blue-500"
+            : netChange.isDecrease
+            ? "text-red-500"
+            : "text-gray-500"
           : "text-gray-500",
     },
   ];
+
+  const friendlyWeekLabels = [
+    "This Week",
+    "Previous Week - 1",
+    "Previous Week - 2",
+    "Previous Week - 3",
+  ];
+  const weeklyTrends = (metrics.weeklyTrends || []).map((item, idx, arr) => ({
+    ...item,
+    friendlyLabel: friendlyWeekLabels[arr.length - 1 - idx] || item.week,
+  }));
 
   return (
     <div className="w-full py-6">
@@ -271,7 +298,12 @@ const Dashboard = () => {
                     tick={{ fontSize: 12 }}
                   />
                   <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      `₹${value.toLocaleString()}`,
+                      name,
+                    ]}
+                  />
                   <Bar
                     dataKey="expense"
                     fill="#f87171"
@@ -289,21 +321,81 @@ const Dashboard = () => {
             )}
           </div>
           <div className="bg-white rounded-xl p-6 shadow border border-gray-100 flex flex-col items-center justify-center">
-            <h2 className="font-semibold text-lg text-gray-800 mb-2">
-              Expense Categories
-            </h2>
+            <div className="flex items-center justify-between w-full mb-2">
+              <h2 className="font-semibold text-lg text-gray-800 mb-0">
+                Expense Categories
+              </h2>
+              <div className="flex gap-2">
+                <button
+                  className={`px-3 py-1 rounded text-xs font-semibold ${
+                    pieView === "monthly"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                  onClick={() => {
+                    setPieView("monthly");
+                    setPiePeriodIndex(0);
+                  }}
+                >
+                  Monthly
+                </button>
+                <button
+                  className={`px-3 py-1 rounded text-xs font-semibold ${
+                    pieView === "yearly"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                  onClick={() => {
+                    setPieView("yearly");
+                    setPiePeriodIndex(0);
+                  }}
+                >
+                  Yearly
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-2 mb-2">
+              {pieDataArr.map((period, idx) => (
+                <button
+                  key={idx}
+                  className={`px-2 py-1 rounded text-xs font-medium border ${
+                    piePeriodIndex === idx
+                      ? "bg-blue-500 text-white border-blue-500"
+                      : "bg-gray-100 text-gray-700 border-gray-200"
+                  }`}
+                  onClick={() => setPiePeriodIndex(idx)}
+                >
+                  {pieView === "monthly" ? period.month : period.year}
+                </button>
+              ))}
+            </div>
             <p className="text-gray-400 text-sm mb-2">
-              Your spending breakdown
+              {pieView === "monthly"
+                ? `Breakdown for ${pieLabel}`
+                : `Breakdown for ${pieLabel}`}
             </p>
-            {metrics.expenseCategories.length === 0 ? (
+            {pieData.length === 0 ? (
               <div className="text-gray-400 text-center py-12">
                 No data available
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
+                  <Tooltip
+                    formatter={(value, name) => {
+                      const total = pieData.reduce(
+                        (sum, item) => sum + item.value,
+                        0
+                      );
+                      const percentage = ((value / total) * 100).toFixed(1);
+                      return [
+                        `₹${value.toLocaleString()} (${percentage}%)`,
+                        name,
+                      ];
+                    }}
+                  />
                   <Pie
-                    data={metrics.expenseCategories}
+                    data={pieData}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
@@ -323,11 +415,10 @@ const Dashboard = () => {
                           stroke="#6366f1"
                           strokeWidth={3}
                         />
-                        {/* <Pie {...props} /> */}
                       </g>
                     )}
                   >
-                    {metrics.expenseCategories.map((entry, idx) => (
+                    {pieData.map((entry, idx) => (
                       <Cell
                         key={`cell-${idx}`}
                         fill={pieColors[idx % pieColors.length]}
@@ -369,11 +460,16 @@ const Dashboard = () => {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={metrics.weeklyTrends}>
+              <LineChart data={weeklyTrends}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="week" tick={{ fontSize: 12 }} />
+                <XAxis dataKey="friendlyLabel" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
+                <Tooltip
+                  formatter={(value, name) => [
+                    `₹${value.toLocaleString()}`,
+                    name,
+                  ]}
+                />
                 <Line
                   type="monotone"
                   dataKey="expense"

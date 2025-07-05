@@ -144,7 +144,7 @@ const dashboardMetrics = async (req, res) => {
     return processRequest({ message: "userId is required" }, null, res);
   try {
     const userObjId = new mongoose.Types.ObjectId(userId);
-    // Totals
+    // Fetch all transactions for the user
     const all = await Transaction.find({ userId: userObjId });
     const totalIncome = all
       .filter((t) => t.type === "Income")
@@ -153,7 +153,8 @@ const dashboardMetrics = async (req, res) => {
       .filter((t) => t.type === "Expense")
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     const netSavings = totalIncome - totalExpenses;
-    // Monthly income/expense
+
+    // --- Monthly income/expense (last 4 months) ---
     const months = [
       "Jan",
       "Feb",
@@ -168,62 +169,128 @@ const dashboardMetrics = async (req, res) => {
       "Nov",
       "Dec",
     ];
-    const incomeExpenseData = Array(12)
-      .fill(0)
-      .map((_, i) => ({ month: months[i], income: 0, expense: 0 }));
-    all.forEach((t) => {
-      const d = new Date(t.dateOfTransaction);
-      const m = d.getMonth();
-      if (t.type === "Income") incomeExpenseData[m].income += t.amount;
-      if (t.type === "Expense")
-        incomeExpenseData[m].expense += Math.abs(t.amount);
+    // Get last 4 months (with year)
+    const now = new Date();
+    const last4Months = [];
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      last4Months.push({
+        key: `${d.getFullYear()}-${d.getMonth()}`,
+        label: `${months[d.getMonth()]} ${d.getFullYear()}`,
+        year: d.getFullYear(),
+        month: d.getMonth(),
+      });
+    }
+    const incomeExpenseData = last4Months.map(({ year, month, label }) => {
+      let income = 0,
+        expense = 0;
+      all.forEach((t) => {
+        const d = new Date(t.dateOfTransaction);
+        if (d.getFullYear() === year && d.getMonth() === month) {
+          if (t.type === "Income") income += t.amount;
+          if (t.type === "Expense") expense += Math.abs(t.amount);
+        }
+      });
+      return { month: label, income, expense };
     });
-    // Yearly income/expense
-    const yearlyMap = {};
-    all.forEach((t) => {
-      const d = new Date(t.dateOfTransaction);
-      const y = d.getFullYear();
-      if (!yearlyMap[y]) yearlyMap[y] = { year: y, income: 0, expense: 0 };
-      if (t.type === "Income") yearlyMap[y].income += t.amount;
-      if (t.type === "Expense") yearlyMap[y].expense += Math.abs(t.amount);
-    });
-    const yearlyIncomeExpenseData = Object.values(yearlyMap).sort(
-      (a, b) => a.year - b.year
+
+    // --- Yearly income/expense (last 4 years) ---
+    const yearsSet = new Set(
+      all.map((t) => new Date(t.dateOfTransaction).getFullYear())
     );
-    // Category breakdown
-    const categoryMap = {};
-    all.forEach((t) => {
-      if (!categoryMap[t.category]) categoryMap[t.category] = 0;
-      categoryMap[t.category] += Math.abs(t.amount);
+    const yearsSorted = Array.from(yearsSet).sort((a, b) => a - b);
+    const last4Years = yearsSorted.slice(-4);
+    const yearlyIncomeExpenseData = last4Years.map((year) => {
+      let income = 0,
+        expense = 0;
+      all.forEach((t) => {
+        const d = new Date(t.dateOfTransaction);
+        if (d.getFullYear() === year) {
+          if (t.type === "Income") income += t.amount;
+          if (t.type === "Expense") expense += Math.abs(t.amount);
+        }
+      });
+      return { year, income, expense };
     });
-    const expenseCategories = Object.entries(categoryMap).map(
-      ([name, value]) => ({ name, value })
+
+    // --- Category breakdown for last 4 months ---
+    const expenseCategoriesMonthly = last4Months.map(
+      ({ year, month, label }) => {
+        const catMap = {};
+        all.forEach((t) => {
+          const d = new Date(t.dateOfTransaction);
+          if (
+            t.type === "Expense" &&
+            d.getFullYear() === year &&
+            d.getMonth() === month
+          ) {
+            if (!catMap[t.category]) catMap[t.category] = 0;
+            catMap[t.category] += Math.abs(t.amount);
+          }
+        });
+        return {
+          month: label,
+          categories: Object.entries(catMap).map(([name, value]) => ({
+            name,
+            value,
+          })),
+        };
+      }
     );
-    // Weekly trends (real data)
-    const getWeek = (date) => {
+
+    // --- Category breakdown for last 4 years ---
+    const expenseCategoriesYearly = last4Years.map((year) => {
+      const catMap = {};
+      all.forEach((t) => {
+        const d = new Date(t.dateOfTransaction);
+        if (t.type === "Expense" && d.getFullYear() === year) {
+          if (!catMap[t.category]) catMap[t.category] = 0;
+          catMap[t.category] += Math.abs(t.amount);
+        }
+      });
+      return {
+        year,
+        categories: Object.entries(catMap).map(([name, value]) => ({
+          name,
+          value,
+        })),
+      };
+    });
+
+    // --- Weekly trends (last 4 weeks) ---
+    const getWeekKey = (date) => {
       const d = new Date(date);
       d.setHours(0, 0, 0, 0);
       d.setDate(d.getDate() + 4 - (d.getDay() || 7));
       const yearStart = new Date(d.getFullYear(), 0, 1);
       const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-      return `Week ${weekNo}`;
+      return `${d.getFullYear()}-W${weekNo}`;
     };
-    const weekMap = {};
-    all.forEach((t) => {
-      const week = getWeek(t.dateOfTransaction);
-      if (!weekMap[week])
-        weekMap[week] = { week, expense: 0, income: 0, savings: 0 };
-      if (t.type === "Income") weekMap[week].income += t.amount;
-      if (t.type === "Expense") weekMap[week].expense += Math.abs(t.amount);
+    // Get last 4 week keys
+    const weekKeys = [];
+    const today = new Date();
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i * 7);
+      weekKeys.push(getWeekKey(d));
+    }
+    const weeklyTrends = weekKeys.map((weekKey) => {
+      let income = 0,
+        expense = 0;
+      all.forEach((t) => {
+        if (getWeekKey(t.dateOfTransaction) === weekKey) {
+          if (t.type === "Income") income += t.amount;
+          if (t.type === "Expense") expense += Math.abs(t.amount);
+        }
+      });
+      return {
+        week: weekKey,
+        income,
+        expense,
+        savings: income - expense,
+      };
     });
-    Object.values(weekMap).forEach((w) => {
-      w.savings = w.income - w.expense;
-    });
-    const weeklyTrends = Object.values(weekMap).sort((a, b) => {
-      const aNum = parseInt(a.week.replace(/\D/g, ""));
-      const bNum = parseInt(b.week.replace(/\D/g, ""));
-      return aNum - bNum;
-    });
+
     return processRequest(
       null,
       {
@@ -232,7 +299,8 @@ const dashboardMetrics = async (req, res) => {
         netSavings,
         incomeExpenseData,
         yearlyIncomeExpenseData,
-        expenseCategories,
+        expenseCategoriesMonthly,
+        expenseCategoriesYearly,
         weeklyTrends,
       },
       res
@@ -358,6 +426,17 @@ const importTransactions = async (req, res) => {
     ) {
       return processRequest(
         { message: "Transactions array is required and cannot be empty" },
+        null,
+        res
+      );
+    }
+
+    // Check maximum transactions limit
+    if (transactions.length > 50) {
+      return processRequest(
+        {
+          message: `Maximum 50 transactions allowed. Found ${transactions.length} transactions.`,
+        },
         null,
         res
       );

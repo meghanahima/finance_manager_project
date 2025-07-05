@@ -83,6 +83,31 @@ const LoginPage = () => {
             : "Create your account to get started"}
         </p>
 
+        {/* Demo credentials section */}
+        <div className="mb-4 w-96 max-w-md mx-auto bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+          <div className="font-semibold text-yellow-800 mb-1">
+            Try with demo credentials
+          </div>
+          <div className="text-sm text-yellow-700 mb-2">
+            <div>
+              mail: <span className="font-mono">demo@gmail.com</span>
+            </div>
+            <div>
+              password: <span className="font-mono">demo</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="px-4 py-1 bg-yellow-400 text-yellow-900 rounded hover:bg-yellow-500 font-medium text-sm"
+            onClick={() => {
+              setEmail("demo@gmail.com");
+              setPassword("demo");
+            }}
+          >
+            Fill Demo Credentials
+          </button>
+        </div>
+
         <Card className="border-teal-100 shadow-lg w-96 max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-teal-800">
@@ -147,16 +172,6 @@ const LoginPage = () => {
                     {showPassword ? <EyeOff className="" /> : <Eye />}
                   </button>
                 </div>
-                {isLogin && (
-                  <div className="text-right">
-                    <button
-                      type="button"
-                      className="text-sm text-teal-600 hover:text-teal-800"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                )}
               </div>
 
               {error && (

@@ -44,7 +44,12 @@ const Navbar = () => {
         <Menu className="h-7 w-7 text-gray-600" />
       </button>
       {/* Brand */}
-      <span className="text-xl font-bold text-teal-700 flex-1">FinAssist</span>
+      <span
+        className="text-xl font-bold text-teal-700 flex-1 cursor-pointer"
+        onClick={() => navigate("/dashboard")}
+      >
+        FinAssist
+      </span>
       {/* Desktop nav links */}
       <div className="hidden md:flex flex-1 items-center gap-8">
         {navLinks.map((link) => (
