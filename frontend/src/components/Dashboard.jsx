@@ -100,7 +100,46 @@ const Dashboard = () => {
 
   if (loading)
     return (
-      <div className="p-8 text-center text-gray-500">Loading dashboard...</div>
+      <div className="py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Enhanced Welcome Section */}
+          <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 mb-6 lg:mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
+            {/* Subtle shine effects */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-radial from-white/10 to-transparent rounded-full blur-3xl"></div>
+
+            {/* Content */}
+            <div className="relative z-10">
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-3">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
+                  <span className="text-5xl sm:text-6xl lg:text-7xl filter drop-shadow-sm">
+                    💰
+                  </span>
+                </div>
+                <div className="text-center sm:text-left">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent leading-tight mb-2">
+                    Financial Assistant
+                  </h1>
+                  <p className="text-slate-600 text-base sm:text-lg font-medium flex items-center justify-center sm:justify-start gap-2">
+                    <span className="inline-block w-2 h-2 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full animate-pulse"></span>
+                    Ready to manage your finances with clarity and control
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading Message */}
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mb-6"></div>
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Loading Dashboard...</h3>
+              <p className="text-gray-500">Please wait while we fetch your financial data</p>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
   if (!metrics) return null;
@@ -245,7 +284,9 @@ const Dashboard = () => {
           <div className="relative z-10">
             <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-3">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
-                <span className="text-5xl sm:text-6xl lg:text-7xl filter drop-shadow-sm">💰</span>
+                <span className="text-5xl sm:text-6xl lg:text-7xl filter drop-shadow-sm">
+                  💰
+                </span>
               </div>
               <div className="text-center sm:text-left">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent leading-tight mb-2">
@@ -264,13 +305,19 @@ const Dashboard = () => {
         <div className="mb-6 lg:mb-8">
           <div className="flex items-center gap-3 mb-4 lg:mb-6">
             <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
                 This Month Overview
               </h2>
               <p className="text-slate-500 text-xs sm:text-sm font-medium">
                 Your current month's financial summary
               </p>
+            </div>
+            <div className="text-right">
+              {/* Month Display */}
+                  <div className="mt-4 inline-block bg-blue-400 text-white px-6 py-1 rounded-lg text-sm font-medium">
+                    {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </div>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

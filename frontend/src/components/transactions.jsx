@@ -237,13 +237,18 @@ const Transactions = () => {
 
   // Delete transaction
   const handleDeleteTransaction = async (transactionId) => {
-    if (!confirm("Are you sure you want to delete this transaction?")) {
-      return;
-    }
+    // Enhanced confirmation dialog
+    const confirmDelete = window.confirm(
+      "🗑️ Delete Transaction\n\nAre you sure you want to delete this transaction? This action cannot be undone."
+    );
+
+    if (!confirmDelete) return;
 
     const userId = getUserId();
     if (!userId) {
-      alert("Please log in to delete transactions.");
+      alert(
+        "❌ Authentication Required\n\nPlease log in to delete transactions."
+      );
       return;
     }
 
@@ -260,13 +265,20 @@ const Transactions = () => {
       if (response.ok) {
         // Refresh the transactions list
         setTransactions((prev) => prev.filter((t) => t._id !== transactionId));
-        alert("Transaction deleted successfully!");
+        alert("✅ Success!\n\nTransaction has been deleted successfully.");
       } else {
         const errorData = await response.json();
-        alert(errorData.message || "Failed to delete transaction.");
+        alert(
+          `❌ Delete Failed\n\n${
+            errorData.message ||
+            "Unable to delete the transaction. Please try again."
+          }`
+        );
       }
     } catch {
-      alert("Error deleting transaction. Please try again.");
+      alert(
+        "⚠️ Connection Error\n\nUnable to delete transaction due to network issues. Please check your connection and try again."
+      );
     }
   };
 
@@ -280,7 +292,9 @@ const Transactions = () => {
   const handleUpdateTransaction = async (updatedData) => {
     const userId = getUserId();
     if (!userId) {
-      alert("Please log in to update transactions.");
+      alert(
+        "❌ Authentication Required\n\nPlease log in to update transactions."
+      );
       return;
     }
 
@@ -306,13 +320,22 @@ const Transactions = () => {
         );
         setShowEditModal(false);
         setEditingTransaction(null);
-        alert("Transaction updated successfully!");
+        alert(
+          "✅ Update Successful!\n\nYour transaction has been updated successfully."
+        );
       } else {
         const errorData = await response.json();
-        alert(errorData.message || "Failed to update transaction.");
+        alert(
+          `❌ Update Failed\n\n${
+            errorData.message ||
+            "Unable to update the transaction. Please try again."
+          }`
+        );
       }
     } catch {
-      alert("Error updating transaction. Please try again.");
+      alert(
+        "⚠️ Connection Error\n\nUnable to update transaction due to network issues. Please check your connection and try again."
+      );
     }
   };
 
@@ -330,11 +353,13 @@ const Transactions = () => {
           {/* Subtle shine effects */}
           <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-16 sm:-mr-20 -mt-16 sm:-mt-20 blur-xl"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-12 sm:-ml-16 -mb-12 sm:-mb-16 blur-lg"></div>
-          
+
           <div className="relative z-10">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3">
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
-                <span className="text-2xl sm:text-4xl filter drop-shadow-sm">📊</span>
+                <span className="text-2xl sm:text-4xl filter drop-shadow-sm">
+                  📊
+                </span>
               </div>
               <div className="text-center">
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-2 sm:mb-3">
@@ -349,7 +374,6 @@ const Transactions = () => {
           </div>
         </div>
       </div>
-
       {/* Filters Section */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
@@ -366,7 +390,9 @@ const Transactions = () => {
         <div className="bg-white rounded-xl sm:rounded-2xl shadow p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="flex-1">
-              <label className="block text-gray-700 font-medium mb-1 text-sm sm:text-base">Type</label>
+              <label className="block text-gray-700 font-medium mb-1 text-sm sm:text-base">
+                Type
+              </label>
               <CustomSelect
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
@@ -408,8 +434,9 @@ const Transactions = () => {
         </div>
       </div>
 
+
       {/* Financial Summary Section */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
+      {/* <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
           <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full shadow-sm"></div>
           <div>
@@ -435,7 +462,7 @@ const Transactions = () => {
               {hasActiveFilters ? "Filtered Data" : "All Transactions"}
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <StatCard
               title="Total Income"
               value={
@@ -476,8 +503,9 @@ const Transactions = () => {
             />
           </div>
         </div>
-      </div>
+      </div> */}
 
+      
       {/* Transaction History Section */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
@@ -492,58 +520,248 @@ const Transactions = () => {
           </div>
         </div>
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 font-medium">Error: {error}</p>
+            </div>
+          )}
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 font-medium">Error: {error}</p>
+          {/* Financial Summary Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full shadow-sm"></div>
+                <div>
+                  <h3 className="text-lg font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+                    Financial Summary
+                  </h3>
+                  <p className="text-slate-500 text-xs font-medium">
+                    {hasActiveFilters
+                      ? "Totals based on your current filter selection"
+                      : "All time totals"}
+                  </p>
+                </div>
+              </div>
+              <div
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+                  hasActiveFilters
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {hasActiveFilters ? "Filtered Data" : "All Transactions"}
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatCard
+                title="Total Income"
+                value={
+                  totalIncome === 0 ? `₹ 0` : `₹ ${totalIncome.toLocaleString()}`
+                }
+                subText={
+                  hasActiveFilters ? "Based on filters applied" : "All time total"
+                }
+                icon={typeIcons.Income}
+                bgColor="bg-green-50"
+                textColor="text-teal-900"
+              />
+              <StatCard
+                title="Total Expenses"
+                value={
+                  totalExpenses === 0
+                    ? `₹ 0`
+                    : `₹ ${totalExpenses.toLocaleString()}`
+                }
+                subText={
+                  hasActiveFilters ? "Based on filters applied" : "All time total"
+                }
+                icon={typeIcons.Expense}
+                bgColor="bg-red-50"
+                textColor="text-red-800"
+              />
+              <StatCard
+                title="Net Balance"
+                value={`₹ ${netBalance.toLocaleString()}`}
+                subText={
+                  hasActiveFilters
+                    ? "Based on filters applied"
+                    : "All time balance"
+                }
+                icon={typeIcons.Balance}
+                bgColor="bg-violet-50"
+                textColor="text-violet-900"
+              />
+            </div>
           </div>
-        )}
 
-        {/* Mobile Card View */}
-        <div className="block lg:hidden">
-          {loading ? (
-            <div className="py-12 text-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                <p className="text-slate-500">Loading transactions...</p>
-              </div>
+          {/* Transaction List Section */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-1 h-6 bg-gradient-to-b from-slate-500 to-slate-600 rounded-full shadow-sm"></div>
+              <h3 className="text-lg font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+                Transaction List
+              </h3>
             </div>
-          ) : transactions.length === 0 ? (
-            <div className="py-12 text-center">
-              <div className="flex flex-col items-center gap-3">
-                <HandCoins className="h-12 w-12 text-slate-300" />
-                <p className="text-slate-500 font-medium">
-                  No transactions found
-                </p>
-                <p className="text-slate-400 text-sm">
-                  Try adjusting your filters or add some transactions
-                </p>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="block lg:hidden">
+            {loading ? (
+              <div className="py-12 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                  <p className="text-slate-500">Loading transactions...</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {transactions.map((t, idx) => (
-                <div
-                  key={idx}
-                  className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+            ) : transactions.length === 0 ? (
+              <div className="py-12 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <HandCoins className="h-12 w-12 text-slate-300" />
+                  <p className="text-slate-500 font-medium">
+                    No transactions found
+                  </p>
+                  <p className="text-slate-400 text-sm">
+                    Try adjusting your filters or add some transactions
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {transactions.map((t, idx) => (
+                  <div
+                    key={idx}
+                    className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                              t.type === "Income"
+                                ? "bg-teal-500 text-white"
+                                : "bg-orange-500 text-white"
+                            }`}
+                          >
+                            {t.type}
+                          </span>
+                          <span className="text-slate-600 text-sm font-medium">
+                            {t.category}
+                          </span>
+                        </div>
+                        <p className="text-slate-500 text-sm">
+                          {t.dateOfTransaction
+                            ? new Date(t.dateOfTransaction).toString() !==
+                              "Invalid Date"
+                              ? new Date(
+                                  t.dateOfTransaction
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "2-digit",
+                                  year: "numeric",
+                                })
+                              : "-"
+                            : "-"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div
+                          className={`font-bold text-lg ${
                             t.type === "Income"
-                              ? "bg-teal-500 text-white"
-                              : "bg-orange-500 text-white"
+                              ? "text-emerald-600"
+                              : "text-red-600"
                           }`}
                         >
-                          {t.type}
-                        </span>
-                        <span className="text-slate-600 text-sm font-medium">
-                          {t.category}
-                        </span>
+                          {t.type === "Income" ? "+" : "-"}₹
+                          {Math.abs(t.amount).toLocaleString()}
+                        </div>
                       </div>
-                      <p className="text-slate-500 text-sm">
+                    </div>
+                    {t.description && (
+                      <p className="text-slate-500 text-sm mb-3 line-clamp-2">
+                        {t.description}
+                      </p>
+                    )}
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        className="h-8 w-8 flex items-center justify-center hover:bg-blue-50 rounded-lg transition-all duration-200 border border-transparent hover:border-blue-200"
+                        onClick={() => handleEditTransaction(t)}
+                        title="Edit transaction"
+                      >
+                        <Edit className="h-4 w-4 text-blue-600" />
+                      </button>
+                      <button
+                        className="h-8 w-8 flex items-center justify-center hover:bg-red-50 rounded-lg transition-all duration-200 border border-transparent hover:border-red-200"
+                        onClick={() => handleDeleteTransaction(t._id)}
+                        title="Delete transaction"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
+            <table className="min-w-full text-sm bg-white rounded-xl">
+              <thead>
+                <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                  <th className="py-4 px-6 text-left font-semibold text-slate-700">
+                    Date
+                  </th>
+                  <th className="py-4 px-6 text-left font-semibold text-slate-700">
+                    Type
+                  </th>
+                  <th className="py-4 px-6 text-left font-semibold text-slate-700">
+                    Category
+                  </th>
+                  <th className="py-4 px-6 text-right font-semibold text-slate-700">
+                    Amount
+                  </th>
+                  <th className="py-4 px-6 text-left font-semibold text-slate-700">
+                    Description
+                  </th>
+                  <th className="py-4 px-6 text-center font-semibold text-slate-700">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="py-12 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        <p className="text-slate-500">
+                          Loading transactions...
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : transactions.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="py-12 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <HandCoins className="h-12 w-12 text-slate-300" />
+                        <p className="text-slate-500 font-medium">
+                          No transactions found
+                        </p>
+                        <p className="text-slate-400 text-sm">
+                          Try adjusting your filters or add some transactions
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  transactions.map((t, idx) => (
+                    <tr
+                      key={idx}
+                      className="hover:bg-slate-50/50 transition-colors duration-150 group"
+                    >
+                      <td className="py-4 px-6 font-medium text-slate-700 border-l-4 border-transparent group-hover:border-l-slate-200">
                         {t.dateOfTransaction
                           ? new Date(t.dateOfTransaction).toString() !==
                             "Invalid Date"
@@ -557,237 +775,126 @@ const Transactions = () => {
                               )
                             : "-"
                           : "-"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div
-                        className={`font-bold text-lg ${
-                          t.type === "Income"
-                            ? "text-emerald-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {t.type === "Income" ? "+" : "-"}₹
-                        {Math.abs(t.amount).toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                  {t.description && (
-                    <p className="text-slate-500 text-sm mb-3 line-clamp-2">
-                      {t.description}
-                    </p>
-                  )}
-                  <div className="flex gap-2 justify-end">
-                    <button
-                      className="h-8 w-8 flex items-center justify-center hover:bg-blue-50 rounded-lg transition-all duration-200 border border-transparent hover:border-blue-200"
-                      onClick={() => handleEditTransaction(t)}
-                      title="Edit transaction"
-                    >
-                      <Edit className="h-4 w-4 text-blue-600" />
-                    </button>
-                    <button
-                      className="h-8 w-8 flex items-center justify-center hover:bg-red-50 rounded-lg transition-all duration-200 border border-transparent hover:border-red-200"
-                      onClick={() => handleDeleteTransaction(t._id)}
-                      title="Delete transaction"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-600" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Desktop Table View */}
-        <div className="hidden lg:block overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
-          <table className="min-w-full text-sm bg-white rounded-xl">
-            <thead>
-              <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                <th className="py-4 px-6 text-left font-semibold text-slate-700">
-                  Date
-                </th>
-                <th className="py-4 px-6 text-left font-semibold text-slate-700">
-                  Type
-                </th>
-                <th className="py-4 px-6 text-left font-semibold text-slate-700">
-                  Category
-                </th>
-                <th className="py-4 px-6 text-right font-semibold text-slate-700">
-                  Amount
-                </th>
-                <th className="py-4 px-6 text-left font-semibold text-slate-700">
-                  Description
-                </th>
-                <th className="py-4 px-6 text-center font-semibold text-slate-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                <tr>
-                  <td colSpan="6" className="py-12 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                      <p className="text-slate-500">Loading transactions...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : transactions.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="py-12 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <HandCoins className="h-12 w-12 text-slate-300" />
-                      <p className="text-slate-500 font-medium">
-                        No transactions found
-                      </p>
-                      <p className="text-slate-400 text-sm">
-                        Try adjusting your filters or add some transactions
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                transactions.map((t, idx) => (
-                  <tr
-                    key={idx}
-                    className="hover:bg-slate-50/50 transition-colors duration-150 group"
-                  >
-                    <td className="py-4 px-6 font-medium text-slate-700 border-l-4 border-transparent group-hover:border-l-slate-200">
-                      {t.dateOfTransaction
-                        ? new Date(t.dateOfTransaction).toString() !==
-                          "Invalid Date"
-                          ? new Date(t.dateOfTransaction).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "2-digit",
-                                year: "numeric",
-                              }
-                            )
-                          : "-"
-                        : "-"}
-                    </td>
-                    <td className="py-4 px-6">
-                      <span
-                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm ${
-                          t.type === "Income"
-                            ? "bg-teal-500 text-white"
-                            : "bg-orange-500 text-white"
-                        }`}
-                      >
-                        {t.type}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-slate-600 font-medium">
-                      {t.category}
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <span
-                        className={`font-bold text-lg ${
-                          t.type === "Income"
-                            ? "text-emerald-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {t.type === "Income" ? "+" : "-"}₹
-                        {Math.abs(t.amount).toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-slate-500 max-w-xs truncate">
-                      {t.description || "-"}
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                      <div className="flex gap-2 justify-center">
-                        <button
-                          className="h-9 w-9 flex items-center justify-center hover:bg-blue-50 rounded-lg transition-all duration-200 group/btn border border-transparent hover:border-blue-200"
-                          onClick={() => handleEditTransaction(t)}
-                          title="Edit transaction"
+                      </td>
+                      <td className="py-4 px-6">
+                        <span
+                          className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm ${
+                            t.type === "Income"
+                              ? "bg-teal-500 text-white"
+                              : "bg-orange-500 text-white"
+                          }`}
                         >
-                          <Edit className="h-4 w-4 text-blue-600 group-hover/btn:scale-110 transition-transform" />
-                        </button>
-                        <button
-                          className="h-9 w-9 flex items-center justify-center hover:bg-red-50 rounded-lg transition-all duration-200 group/btn border border-transparent hover:border-red-200"
-                          onClick={() => handleDeleteTransaction(t._id)}
-                          title="Delete transaction"
+                          {t.type}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-slate-600 font-medium">
+                        {t.category}
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <span
+                          className={`font-bold text-lg ${
+                            t.type === "Income"
+                              ? "text-emerald-600"
+                              : "text-red-600"
+                          }`}
                         >
-                          <Trash2 className="h-4 w-4 text-red-600 group-hover/btn:scale-110 transition-transform" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                          {t.type === "Income" ? "+" : "-"}₹
+                          {Math.abs(t.amount).toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-slate-500 max-w-xs truncate">
+                        {t.description || "-"}
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            className="h-9 w-9 flex items-center justify-center hover:bg-blue-50 rounded-lg transition-all duration-200 group/btn border border-transparent hover:border-blue-200"
+                            onClick={() => handleEditTransaction(t)}
+                            title="Edit transaction"
+                          >
+                            <Edit className="h-4 w-4 text-blue-600 group-hover/btn:scale-110 transition-transform" />
+                          </button>
+                          <button
+                            className="h-9 w-9 flex items-center justify-center hover:bg-red-50 rounded-lg transition-all duration-200 group/btn border border-transparent hover:border-red-200"
+                            onClick={() => handleDeleteTransaction(t._id)}
+                            title="Delete transaction"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600 group-hover/btn:scale-110 transition-transform" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Pagination */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-100 gap-4 sm:gap-0">
-          <span className="text-slate-500 font-medium text-sm text-center sm:text-left">
-            Page {page} of {totalPages} • {totalCount} total transactions
-          </span>
-          <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
-            {page > 1 && (
-              <button
-                onClick={() => setPage(page - 1)}
-                className="px-3 sm:px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200 text-sm"
-              >
-                Previous
-              </button>
-            )}
-            {/* Page numbers logic */}
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((p) => {
-                if (totalPages <= 3) return true;
-                if (page === 1) return p <= 3;
-                if (page === totalPages) return p >= totalPages - 2;
-                return Math.abs(p - page) <= 1;
-              })
-              .map((p) => (
+          {/* Pagination */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-100 gap-4 sm:gap-0">
+            <span className="text-slate-500 font-medium text-sm text-center sm:text-left">
+              Page {page} of {totalPages} • {totalCount} total transactions
+            </span>
+            <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
+              {page > 1 && (
                 <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold border transition-colors duration-200 text-sm ${
-                    p === page
-                      ? "bg-blue-500 text-white border-blue-500 shadow-sm"
-                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
-                  }`}
+                  onClick={() => setPage(page - 1)}
+                  className="px-3 sm:px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200 text-sm"
                 >
-                  {p}
+                  Previous
                 </button>
-              ))}
-            {page < totalPages && (
-              <button
-                onClick={() => setPage(page + 1)}
-                className="px-3 sm:px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200 text-sm"
-              >
-                Next
-              </button>
-            )}
+              )}
+              {/* Page numbers logic */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((p) => {
+                  if (totalPages <= 3) return true;
+                  if (page === 1) return p <= 3;
+                  if (page === totalPages) return p >= totalPages - 2;
+                  return Math.abs(p - page) <= 1;
+                })
+                .map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`px-3 sm:px-4 py-2 rounded-lg font-semibold border transition-colors duration-200 text-sm ${
+                      p === page
+                        ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              {page < totalPages && (
+                <button
+                  onClick={() => setPage(page + 1)}
+                  className="px-3 sm:px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200 text-sm"
+                >
+                  Next
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Edit Modal */}
-      {showEditModal && editingTransaction && (
-        <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-96 max-w-md mx-4 shadow-2xl border border-gray-200">
-            <h3 className="text-lg font-semibold mb-4">Edit Transaction</h3>
-            <EditTransactionForm
-              transaction={editingTransaction}
-              onSave={handleUpdateTransaction}
-              onCancel={() => {
-                setShowEditModal(false);
-                setEditingTransaction(null);
-              }}
-            />
+        {/* Edit Modal */}
+        {showEditModal && editingTransaction && (
+          <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-96 max-w-md mx-4 shadow-2xl border border-gray-200">
+              <h3 className="text-lg font-semibold mb-4">Edit Transaction</h3>
+              <EditTransactionForm
+                transaction={editingTransaction}
+                onSave={handleUpdateTransaction}
+                onCancel={() => {
+                  setShowEditModal(false);
+                  setEditingTransaction(null);
+                }}
+              />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        )}
+      </div>
+      );
     </div>
   );
 };

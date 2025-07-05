@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Info,
   Copy,
+  ChevronDown,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { getUserId } from "../utilities/auth.js";
@@ -426,14 +427,21 @@ const ImportTransactions = () => {
         <div className="bg-white rounded-xl shadow-lg p-8">
           {/* File Format Guide */}
           <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start">
-              <Info className="h-6 w-6 text-blue-600 mr-3 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900 mb-3">
-                  Excel Format Requirements
-                </h3>
-
-                <div className="space-y-4">
+            <details className="group">
+              <summary className="flex items-center justify-between cursor-pointer list-none">
+                <div className="flex items-start">
+                  <Info className="h-6 w-6 text-blue-600 mr-3 mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-900 mb-1">
+                      Excel Format Requirements
+                    </h3>
+                    <p className="text-sm text-blue-700">Click to view formatting guidelines</p>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 text-blue-600 group-open:rotate-180 transition-transform duration-200 flex-shrink-0" />
+              </summary>
+              
+              <div className="mt-4 space-y-4">
                   <div>
                     <h4 className="font-medium text-blue-800 mb-2">
                       Required Columns:
@@ -509,8 +517,7 @@ const ImportTransactions = () => {
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
+            </details>
           </div>
 
           {/* Download Template */}
@@ -641,7 +648,7 @@ const ImportTransactions = () => {
             <button
               onClick={handleImport}
               disabled={!file || loading}
-              className="px-8 py-3 bg-gradient-to-r from-teal-300 to-cyan-300 font-semibold rounded-lg hover:from-teal-400 hover:to-cyan-400 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none flex items-center"
+              className="px-12 py-4 text-lg bg-gradient-to-r from-teal-300 to-cyan-300 font-bold rounded-xl hover:from-teal-400 hover:to-cyan-400 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none flex items-center"
             >
               {loading ? (
                 <>
