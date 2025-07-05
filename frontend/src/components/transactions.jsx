@@ -323,24 +323,24 @@ const Transactions = () => {
     typeFilter !== "All" || categoryFilter || startDate || endDate;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8">
+    <div className="py-4 sm:py-6 lg:py-8">
       {/* Header Section */}
-      <div className="w-full max-w-5xl mb-8">
-        <div className="rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
+        <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 mb-6 lg:mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
           {/* Subtle shine effects */}
-          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-16 sm:-mr-20 -mt-16 sm:-mt-20 blur-xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-12 sm:-ml-16 -mb-12 sm:-mb-16 blur-lg"></div>
           
           <div className="relative z-10">
-            <div className="flex items-center justify-center gap-4 mb-3">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
-                <span className="text-4xl filter drop-shadow-sm">📊</span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
+                <span className="text-2xl sm:text-4xl filter drop-shadow-sm">📊</span>
               </div>
               <div className="text-center">
-                <h1 className="text-3xl md:text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-3">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-2 sm:mb-3">
                   Transaction Management
                 </h1>
-                <p className="text-slate-700 text-lg font-medium flex items-center justify-center gap-2">
+                <p className="text-slate-700 text-sm sm:text-base lg:text-lg font-medium flex items-center justify-center gap-2">
                   <span className="inline-block w-1.5 h-1.5 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></span>
                   View, filter, and manage all your transactions with ease
                 </p>
@@ -351,22 +351,22 @@ const Transactions = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="w-full max-w-5xl mb-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
+        <div className="flex items-center gap-3 mb-4 lg:mb-6">
+          <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
           <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
               Filters
             </h2>
-            <p className="text-slate-500 text-sm font-medium">
+            <p className="text-slate-500 text-xs sm:text-sm font-medium">
               Customize your transaction view
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl shadow p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="flex-1">
-              <label className="block text-gray-700 font-medium mb-1">Type</label>
+              <label className="block text-gray-700 font-medium mb-1 text-sm sm:text-base">Type</label>
               <CustomSelect
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
@@ -377,7 +377,7 @@ const Transactions = () => {
               </CustomSelect>
             </div>
             <div className="flex-1">
-              <label className="block text-gray-700 font-medium mb-1">
+              <label className="block text-gray-700 font-medium mb-1 text-sm sm:text-base">
                 Category
               </label>
               <CustomCategorySelect
@@ -387,7 +387,7 @@ const Transactions = () => {
               />
             </div>
             <div className="flex-1">
-              <label className="block text-gray-700 font-medium mb-1">
+              <label className="block text-gray-700 font-medium mb-1 text-sm sm:text-base">
                 From Date
               </label>
               <CustomDate
@@ -396,7 +396,7 @@ const Transactions = () => {
               />
             </div>
             <div className="flex-1">
-              <label className="block text-gray-700 font-medium mb-1">
+              <label className="block text-gray-700 font-medium mb-1 text-sm sm:text-base">
                 To Date
               </label>
               <CustomDate
@@ -409,21 +409,21 @@ const Transactions = () => {
       </div>
 
       {/* Financial Summary Section */}
-      <div className="w-full max-w-5xl mb-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-1 h-8 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full shadow-sm"></div>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
+        <div className="flex items-center gap-3 mb-4 lg:mb-6">
+          <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full shadow-sm"></div>
           <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
               Financial Summary
             </h2>
-            <p className="text-slate-500 text-sm font-medium">
+            <p className="text-slate-500 text-xs sm:text-sm font-medium">
               {hasActiveFilters
                 ? "Totals based on your current filter selection"
                 : "Totals for all your transactions"}
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl shadow p-6">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div
               className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -435,7 +435,7 @@ const Transactions = () => {
               {hasActiveFilters ? "Filtered Data" : "All Transactions"}
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <StatCard
               title="Total Income"
               value={
@@ -479,19 +479,19 @@ const Transactions = () => {
       </div>
 
       {/* Transaction History Section */}
-      <div className="w-full max-w-5xl mb-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-1 h-8 bg-gradient-to-b from-slate-500 to-slate-600 rounded-full shadow-sm"></div>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
+        <div className="flex items-center gap-3 mb-4 lg:mb-6">
+          <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-slate-500 to-slate-600 rounded-full shadow-sm"></div>
           <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
               Transaction History
             </h2>
-            <p className="text-slate-500 text-sm font-medium">
+            <p className="text-slate-500 text-xs sm:text-sm font-medium">
               Showing {transactions.length} of {totalCount} transactions
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -499,7 +499,108 @@ const Transactions = () => {
           </div>
         )}
 
-        <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
+        {/* Mobile Card View */}
+        <div className="block lg:hidden">
+          {loading ? (
+            <div className="py-12 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <p className="text-slate-500">Loading transactions...</p>
+              </div>
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="py-12 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <HandCoins className="h-12 w-12 text-slate-300" />
+                <p className="text-slate-500 font-medium">
+                  No transactions found
+                </p>
+                <p className="text-slate-400 text-sm">
+                  Try adjusting your filters or add some transactions
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {transactions.map((t, idx) => (
+                <div
+                  key={idx}
+                  className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                            t.type === "Income"
+                              ? "bg-teal-500 text-white"
+                              : "bg-orange-500 text-white"
+                          }`}
+                        >
+                          {t.type}
+                        </span>
+                        <span className="text-slate-600 text-sm font-medium">
+                          {t.category}
+                        </span>
+                      </div>
+                      <p className="text-slate-500 text-sm">
+                        {t.dateOfTransaction
+                          ? new Date(t.dateOfTransaction).toString() !==
+                            "Invalid Date"
+                            ? new Date(t.dateOfTransaction).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "2-digit",
+                                  year: "numeric",
+                                }
+                              )
+                            : "-"
+                          : "-"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div
+                        className={`font-bold text-lg ${
+                          t.type === "Income"
+                            ? "text-emerald-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {t.type === "Income" ? "+" : "-"}₹
+                        {Math.abs(t.amount).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                  {t.description && (
+                    <p className="text-slate-500 text-sm mb-3 line-clamp-2">
+                      {t.description}
+                    </p>
+                  )}
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      className="h-8 w-8 flex items-center justify-center hover:bg-blue-50 rounded-lg transition-all duration-200 border border-transparent hover:border-blue-200"
+                      onClick={() => handleEditTransaction(t)}
+                      title="Edit transaction"
+                    >
+                      <Edit className="h-4 w-4 text-blue-600" />
+                    </button>
+                    <button
+                      className="h-8 w-8 flex items-center justify-center hover:bg-red-50 rounded-lg transition-all duration-200 border border-transparent hover:border-red-200"
+                      onClick={() => handleDeleteTransaction(t._id)}
+                      title="Delete transaction"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
           <table className="min-w-full text-sm bg-white rounded-xl">
             <thead>
               <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
@@ -621,16 +722,17 @@ const Transactions = () => {
             </tbody>
           </table>
         </div>
+
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-100">
-          <span className="text-slate-500 font-medium">
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-100 gap-4 sm:gap-0">
+          <span className="text-slate-500 font-medium text-sm text-center sm:text-left">
             Page {page} of {totalPages} • {totalCount} total transactions
           </span>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
             {page > 1 && (
               <button
                 onClick={() => setPage(page - 1)}
-                className="px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200"
+                className="px-3 sm:px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200 text-sm"
               >
                 Previous
               </button>
@@ -647,7 +749,7 @@ const Transactions = () => {
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`px-4 py-2 rounded-lg font-semibold border transition-colors duration-200 ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-semibold border transition-colors duration-200 text-sm ${
                     p === page
                       ? "bg-blue-500 text-white border-blue-500 shadow-sm"
                       : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
@@ -659,7 +761,7 @@ const Transactions = () => {
             {page < totalPages && (
               <button
                 onClick={() => setPage(page + 1)}
-                className="px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200"
+                className="px-3 sm:px-4 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition-colors duration-200 border border-slate-200 text-sm"
               >
                 Next
               </button>

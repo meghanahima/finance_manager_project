@@ -232,10 +232,10 @@ const Dashboard = () => {
   }));
 
   return (
-    <div className="w-full py-6">
-      <div className="mb-6">
+    <div className="py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Enhanced Welcome Section */}
-        <div className="rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
+        <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 mb-6 lg:mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
           {/* Subtle shine effects */}
           <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
@@ -243,15 +243,15 @@ const Dashboard = () => {
 
           {/* Content */}
           <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
-                <span className="text-7xl filter drop-shadow-sm">💰</span>
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-3">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
+                <span className="text-5xl sm:text-6xl lg:text-7xl filter drop-shadow-sm">💰</span>
               </div>
-              <div>
-                <h1 className="text-4xl md:text-4xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent leading-tight mb-2">
+              <div className="text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent leading-tight mb-2">
                   Financial Assistant
                 </h1>
-                <p className="text-slate-600 text-lg font-medium flex items-center gap-2">
+                <p className="text-slate-600 text-base sm:text-lg font-medium flex items-center justify-center sm:justify-start gap-2">
                   <span className="inline-block w-2 h-2 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full animate-pulse"></span>
                   Ready to manage your finances with clarity and control
                 </p>
@@ -261,38 +261,38 @@ const Dashboard = () => {
         </div>
 
         {/* This Month Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-3 mb-4 lg:mb-6">
+            <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
             <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+              <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
                 This Month Overview
               </h2>
-              <p className="text-slate-500 text-sm font-medium">
+              <p className="text-slate-500 text-xs sm:text-sm font-medium">
                 Your current month's financial summary
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {statCards.map((card, idx) => (
               <StatCard key={idx} {...card} />
             ))}
           </div>
         </div>
         {/* Analytics & Charts Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-8 bg-gradient-to-b from-slate-500 to-slate-600 rounded-full shadow-sm"></div>
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-3 mb-4 lg:mb-6">
+            <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-slate-500 to-slate-600 rounded-full shadow-sm"></div>
             <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+              <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
                 Financial Analytics
               </h2>
-              <p className="text-slate-500 text-sm font-medium">
+              <p className="text-slate-500 text-xs sm:text-sm font-medium">
                 Detailed insights and trends analysis
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 shadow-2xl shadow-blue-200/30 border border-white/50 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -487,14 +487,14 @@ const Dashboard = () => {
         </div>
 
         {/* Weekly Trends Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-8 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full shadow-sm"></div>
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-3 mb-4 lg:mb-6">
+            <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full shadow-sm"></div>
             <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+              <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
                 Weekly Trends
               </h2>
-              <p className="text-slate-500 text-sm font-medium">
+              <p className="text-slate-500 text-xs sm:text-sm font-medium">
                 Track your weekly financial patterns
               </p>
             </div>

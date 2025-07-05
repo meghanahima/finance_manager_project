@@ -28,19 +28,21 @@ function AppContent() {
   }, [location.pathname, navigate]);
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       {showNavbar && <Navbar />}
-      <div className="max-w-screen-xl mx-auto px-4">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/addTransaction" element={<AddTransaction />} />
-          <Route path="/importTransactions" element={<ImportTransactions />} />
-          <Route path="/transactions" element={<Transactions />} />
-        </Routes>
-      </div>
-    </>
+      <main className="w-full">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/addTransaction" element={<AddTransaction />} />
+            <Route path="/importTransactions" element={<ImportTransactions />} />
+            <Route path="/transactions" element={<Transactions />} />
+          </Routes>
+        </div>
+      </main>
+    </div>
   );
 }
 

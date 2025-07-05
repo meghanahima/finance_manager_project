@@ -395,25 +395,25 @@ const ImportTransactions = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="py-4 sm:py-6 lg:py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
+        <div className="mb-6 lg:mb-8">
+          <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 mb-6 lg:mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
             {/* Subtle shine effects */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-16 sm:-mr-20 -mt-16 sm:-mt-20 blur-xl"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-12 sm:-ml-16 -mb-12 sm:-mb-16 blur-lg"></div>
             
             <div className="relative z-10">
-              <div className="flex items-center justify-center gap-4 mb-3">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
-                  <span className="text-4xl filter drop-shadow-sm">📤</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
+                  <span className="text-2xl sm:text-4xl filter drop-shadow-sm">📤</span>
                 </div>
                 <div className="text-center">
-                  <h1 className="text-3xl md:text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-3">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-orange-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-2 sm:mb-3">
                     Import Transactions
                   </h1>
-                  <p className="text-slate-700 text-lg font-medium flex items-center justify-center gap-2">
+                  <p className="text-slate-500 text-sm sm:text-base font-medium flex items-center justify-center gap-2">
                     <span className="inline-block w-1.5 h-1.5 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></span>
                     Upload your transaction data from Excel files with ease
                   </p>
