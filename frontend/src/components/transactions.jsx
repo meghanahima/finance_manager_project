@@ -174,6 +174,8 @@ const Transactions = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const perPage = 10;
 
   // Reset category filter when type filter changes
@@ -246,9 +248,11 @@ const Transactions = () => {
 
     const userId = getUserId();
     if (!userId) {
-      alert(
-        "❌ Authentication Required\n\nPlease log in to delete transactions."
+      setErrorMessage(
+        "❌ Authentication Required - Please log in to delete transactions."
       );
+      setSaveSuccess(""); // Clear any existing success messages
+      setTimeout(() => setErrorMessage(""), 4000);
       return;
     }
 
@@ -265,20 +269,30 @@ const Transactions = () => {
       if (response.ok) {
         // Refresh the transactions list
         setTransactions((prev) => prev.filter((t) => t._id !== transactionId));
-        alert("✅ Success!\n\nTransaction has been deleted successfully.");
+        setSaveSuccess(
+          "Delete Successful! Your transaction has been deleted successfully."
+        );
+        setErrorMessage(""); // Clear any existing error messages
+        setTimeout(() => setSaveSuccess(""), 3000);
       } else {
         const errorData = await response.json();
-        alert(
-          `❌ Delete Failed\n\n${
-            errorData.message ||
-            "Unable to delete the transaction. Please try again."
-          }`
-        );
+        // Clean up any localhost URLs from error message
+        const cleanMessage = errorData.message
+          ? errorData.message
+              .replace(/https?:\/\/localhost:\d+/g, "")
+              .replace(/\s+/g, " ")
+              .trim()
+          : "Unable to delete the transaction. Please try again.";
+        setErrorMessage(`❌ Delete Failed - ${cleanMessage}`);
+        setSaveSuccess(""); // Clear any existing success messages
+        setTimeout(() => setErrorMessage(""), 4000);
       }
     } catch {
-      alert(
-        "⚠️ Connection Error\n\nUnable to delete transaction due to network issues. Please check your connection and try again."
+      setErrorMessage(
+        "⚠️ Connection Error - Unable to delete transaction due to network issues. Please check your connection and try again."
       );
+      setSaveSuccess(""); // Clear any existing success messages
+      setTimeout(() => setErrorMessage(""), 4000);
     }
   };
 
@@ -292,9 +306,11 @@ const Transactions = () => {
   const handleUpdateTransaction = async (updatedData) => {
     const userId = getUserId();
     if (!userId) {
-      alert(
-        "❌ Authentication Required\n\nPlease log in to update transactions."
+      setErrorMessage(
+        "❌ Authentication Required - Please log in to update transactions."
       );
+      setSaveSuccess(""); // Clear any existing success messages
+      setTimeout(() => setErrorMessage(""), 4000);
       return;
     }
 
@@ -320,22 +336,29 @@ const Transactions = () => {
         );
         setShowEditModal(false);
         setEditingTransaction(null);
-        alert(
-          "✅ Update Successful!\n\nYour transaction has been updated successfully."
-        );
+        // Show success message in a cleaner way
+        setSaveSuccess("Transaction updated successfully.");
+        setErrorMessage(""); // Clear any existing error messages
+        setTimeout(() => setSaveSuccess(""), 3000);
       } else {
         const errorData = await response.json();
-        alert(
-          `❌ Update Failed\n\n${
-            errorData.message ||
-            "Unable to update the transaction. Please try again."
-          }`
-        );
+        // Clean up any localhost URLs from error message
+        const cleanMessage = errorData.message
+          ? errorData.message
+              .replace(/https?:\/\/localhost:\d+/g, "")
+              .replace(/\s+/g, " ")
+              .trim()
+          : "Unable to update the transaction. Please try again.";
+        setErrorMessage(`Update Failed - ${cleanMessage}`);
+        setSaveSuccess(""); // Clear any existing success messages
+        setTimeout(() => setErrorMessage(""), 4000);
       }
     } catch {
-      alert(
-        "⚠️ Connection Error\n\nUnable to update transaction due to network issues. Please check your connection and try again."
+      setErrorMessage(
+        "⚠️ Connection Error - Unable to update transaction due to network issues. Please check your connection and try again."
       );
+      setSaveSuccess(""); // Clear any existing success messages
+      setTimeout(() => setErrorMessage(""), 4000);
     }
   };
 
@@ -347,6 +370,41 @@ const Transactions = () => {
 
   return (
     <div className="py-4 sm:py-6 lg:py-8">
+      {/* Toast Notification */}
+      {(saveSuccess || errorMessage) && (
+        <div className="fixed top-6 right-6 z-50 max-w-sm">
+          <div
+            className={`p-4 rounded-xl shadow-xl border backdrop-blur-sm flex items-start gap-3 transform transition-all duration-300 ease-out ${
+              saveSuccess
+                ? "bg-green-50/95 border-green-200 text-green-800"
+                : "bg-red-50/95 border-red-200 text-red-800"
+            }`}
+          >
+            <span
+              className={`text-xl mt-0.5 ${
+                saveSuccess ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {saveSuccess ? "✅" : "❌"}
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm leading-relaxed">
+                {saveSuccess || errorMessage}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setSaveSuccess("");
+                setErrorMessage("");
+              }}
+              className="text-gray-400 hover:text-gray-600 ml-1 mt-0.5 flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-200/50 transition-colors"
+            >
+              <span className="text-lg leading-none">×</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
         <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 mb-6 lg:mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
@@ -434,7 +492,6 @@ const Transactions = () => {
         </div>
       </div>
 
-
       {/* Financial Summary Section */}
       {/* <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
@@ -505,7 +562,6 @@ const Transactions = () => {
         </div>
       </div> */}
 
-      
       {/* Transaction History Section */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
         <div className="flex items-center gap-3 mb-4 lg:mb-6">
@@ -552,15 +608,19 @@ const Transactions = () => {
                 {hasActiveFilters ? "Filtered Data" : "All Transactions"}
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <StatCard
                 title="Total Income"
                 value={
-                  totalIncome === 0 ? `₹ 0` : `₹ ${totalIncome.toLocaleString()}`
+                  totalIncome === 0
+                    ? `₹ 0`
+                    : `₹ ${totalIncome.toLocaleString()}`
                 }
                 subText={
-                  hasActiveFilters ? "Based on filters applied" : "All time total"
+                  hasActiveFilters
+                    ? "Based on filters applied"
+                    : "All time total"
                 }
                 icon={typeIcons.Income}
                 bgColor="bg-green-50"
@@ -574,7 +634,9 @@ const Transactions = () => {
                     : `₹ ${totalExpenses.toLocaleString()}`
                 }
                 subText={
-                  hasActiveFilters ? "Based on filters applied" : "All time total"
+                  hasActiveFilters
+                    ? "Based on filters applied"
+                    : "All time total"
                 }
                 icon={typeIcons.Expense}
                 bgColor="bg-red-50"
@@ -889,18 +951,22 @@ const Transactions = () => {
                   setShowEditModal(false);
                   setEditingTransaction(null);
                 }}
+                onError={(message) => {
+                  setErrorMessage(message);
+                  setSaveSuccess(""); // Clear any existing success messages
+                  setTimeout(() => setErrorMessage(""), 4000);
+                }}
               />
             </div>
           </div>
         )}
       </div>
-      );
     </div>
   );
 };
 
 // Edit Transaction Form Component
-const EditTransactionForm = ({ transaction, onSave, onCancel }) => {
+const EditTransactionForm = ({ transaction, onSave, onCancel, onError }) => {
   const [formData, setFormData] = useState({
     type: transaction.type || "Expense",
     category: transaction.category || "",
@@ -937,12 +1003,24 @@ const EditTransactionForm = ({ transaction, onSave, onCancel }) => {
     e.preventDefault();
 
     if (!formData.amount || !formData.category || !formData.type) {
-      alert("Please fill in all required fields");
+      onError("Please fill in all required fields");
       return;
     }
 
     if (Number(formData.amount) <= 0) {
-      alert("Amount must be greater than 0");
+      onError("Amount must be greater than 0");
+      return;
+    }
+
+    // Validate date is not in the future
+    const today = new Date();
+    const selectedDate = new Date(formData.dateOfTransaction);
+    // Set time to beginning of day for accurate comparison
+    today.setHours(0, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      onError("Transaction date cannot be in the future");
       return;
     }
 

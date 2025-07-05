@@ -69,8 +69,9 @@ const LoginPage = () => {
   return (
     <div className="w-full min-h-screen flex flex-col lg:flex-row">
       {/* Left/Form side */}
-      <div className="flex-1 flex flex-col justify-center items-center p-4 sm:p-8 bg-white lg:bg-white">
-        <div className="flex justify-center items-center gap-4 mb-2">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 bg-white min-h-screen">
+        <div className="w-full max-w-lg mx-auto">
+          <div className="flex justify-center items-center gap-4 mb-2">
           <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg shadow-teal-100/50 border border-white/30">
             <span className="text-3xl filter drop-shadow-sm">🔐</span>
           </div>
@@ -111,7 +112,7 @@ const LoginPage = () => {
           </button>
         </div>
 
-        <Card className="border-teal-100 shadow-lg w-full max-w-md">
+        <Card className="border-teal-100 shadow-lg w-full max-w-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-teal-800">
               {isLogin ? "Sign In" : "Create Account"}
@@ -216,10 +217,11 @@ const LoginPage = () => {
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* right side */}
-      <div className="hidden lg:flex flex-1 min-h-screen bg-gradient-to-br from-teal-400 via-teal-500 to-lime-500 items-center justify-center flex-col text-white p-8">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-gradient-to-br from-teal-400 via-teal-500 to-lime-500 items-center justify-center flex-col text-white p-8">
         <div className="rounded-full w-24 h-24 flex items-center justify-center bg-white/20 mb-8">
           <BarChart3 className="text-5xl w-12 h-12" />
         </div>
@@ -248,11 +250,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-<style jsx>{`
-  @media (max-width: 1023px) {
-    body {
-      background: linear-gradient(to bottom right, #14b8a6, #84cc16);
-    }
-  }
-`}</style>;

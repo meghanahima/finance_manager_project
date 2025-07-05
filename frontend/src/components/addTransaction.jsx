@@ -146,6 +146,20 @@ const AddTransaction = () => {
       return;
     }
 
+    // Validate date is not in the future
+    const today = new Date();
+    const selectedDate = new Date(manualForm.date);
+    
+    // Reset time to midnight for both dates for accurate comparison
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const selectedMidnight = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    
+    if (selectedMidnight > todayMidnight) {
+      setSaveSuccess("Transaction date cannot be in the future.");
+      setTimeout(() => setSaveSuccess(""), 3000);
+      return;
+    }
+
     setSaving(true);
     setSaveSuccess("");
 
@@ -201,15 +215,29 @@ const AddTransaction = () => {
   const saveUploadTransaction = async () => {
     // Validate required fields
     if (!uploadForm.amount || !uploadForm.category || !uploadForm.type) {
-      setSaveSuccess("");
-      alert("Please fill in all required fields: Amount, Category, and Type");
+      setSaveSuccess("Please fill in all required fields: Amount, Category, and Type");
+      setTimeout(() => setSaveSuccess(""), 3000);
       return;
     }
 
     // Validate amount is positive
     if (Number(uploadForm.amount) <= 0) {
-      setSaveSuccess("");
-      alert("Amount must be greater than 0");
+      setSaveSuccess("Amount must be greater than 0");
+      setTimeout(() => setSaveSuccess(""), 3000);
+      return;
+    }
+
+    // Validate date is not in the future
+    const today = new Date();
+    const selectedDate = new Date(uploadForm.date);
+    
+    // Reset time to midnight for both dates for accurate comparison
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const selectedMidnight = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    
+    if (selectedMidnight > todayMidnight) {
+      setSaveSuccess("Transaction date cannot be in the future");
+      setTimeout(() => setSaveSuccess(""), 3000);
       return;
     }
 
@@ -275,6 +303,34 @@ const AddTransaction = () => {
 
   return (
     <div className="py-4 sm:py-6 lg:py-8">
+      {/* Toast Notification */}
+      {saveSuccess && (
+        <div className="fixed top-6 right-6 z-50 max-w-sm">
+          <div className={`p-4 rounded-xl shadow-xl border backdrop-blur-sm flex items-start gap-3 transform transition-all duration-300 ease-out ${
+            saveSuccess.includes("successfully") 
+              ? 'bg-green-50/95 border-green-200 text-green-800' 
+              : 'bg-yellow-50/95 border-yellow-200 text-yellow-800'
+          }`}>
+            <span className={`text-xl mt-0.5 ${
+              saveSuccess.includes("successfully") ? 'text-green-600' : 'text-yellow-600'
+            }`}>
+              {saveSuccess.includes("successfully") ? '✅' : '⚠️'}
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm leading-relaxed">
+                {saveSuccess}
+              </p>
+            </div>
+            <button
+              onClick={() => setSaveSuccess("")}
+              className="text-gray-400 hover:text-gray-600 ml-1 mt-0.5 flex-shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-200/50 transition-colors"
+            >
+              <span className="text-lg leading-none">×</span>
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Header Section */}
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
         <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 mb-6 lg:mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
@@ -286,7 +342,7 @@ const AddTransaction = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3">
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100/50 border border-white/30">
                 <span className="text-2xl sm:text-4xl filter drop-shadow-sm">
-                  💰
+                  💱
                 </span>
               </div>
               <div className="text-center sm:text-left">
@@ -493,9 +549,6 @@ const AddTransaction = () => {
               >
                 {saving ? "Saving transaction..." : "✓ Save Transaction"}
               </button>
-              {saveSuccess && (
-                <div className="text-green-600 text-sm mb-2">{saveSuccess}</div>
-              )}
             </div>
           )}
           {activeTab === "upload" && (
@@ -504,52 +557,67 @@ const AddTransaction = () => {
                 {/* Upload Section - Left Side */}
                 <div className="lg:w-1/3">
                   <div className="bg-purple-50 rounded-xl flex flex-col items-center justify-center p-6 h-full min-h-[300px]">
-                    <label
-                      htmlFor="file-upload"
-                      className="cursor-pointer flex flex-col items-center"
-                    >
-                      <div className="bg-white rounded-full p-4 mb-2 border border-purple-200">
-                        <svg width="40" height="40" fill="none" viewBox="0 0 24 24">
-                          <path
-                            d="M12 16V4m0 0l-4 4m4-4l4 4"
-                            stroke="#a855f7"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <rect
-                            x="3"
-                            y="16"
-                            width="18"
-                            height="5"
-                            rx="2"
-                            fill="#f3e8ff"
-                          />
-                        </svg>
+                    {uploadLoading ? (
+                      /* Loading State */
+                      <div className="flex flex-col items-center text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-purple-500 mb-4"></div>
+                        <div className="space-y-2">
+                          <p className="text-purple-700 font-semibold">📤 Uploading Image...</p>
+                          <p className="text-purple-600 text-sm">🤖 Analyzing Receipt...</p>
+                          <p className="text-gray-500 text-xs">Please wait while AI extracts transaction details</p>
+                        </div>
                       </div>
-                      <span className="text-purple-700 font-semibold text-center">
-                        {file ? file.name : "Upload Receipt"}
-                      </span>
-                      <input
-                        id="file-upload"
-                        type="file"
-                        accept="image/*,.pdf"
-                        className="hidden"
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                    {file && (
-                      <span className="text-xs text-gray-500 mt-2">
-                        {(file.size / 1024).toFixed(2)} KB
-                      </span>
-                    )}
-                    {file && (
-                      <button
-                        className="mt-4 px-4 py-2 bg-gray-200 rounded text-gray-700"
-                        onClick={handleRemoveFile}
-                      >
-                        Cancel
-                      </button>
+                    ) : (
+                      /* Upload Interface */
+                      <>
+                        <label
+                          htmlFor="file-upload"
+                          className="cursor-pointer flex flex-col items-center"
+                        >
+                          <div className="bg-white rounded-full p-4 mb-2 border border-purple-200">
+                            <svg width="40" height="40" fill="none" viewBox="0 0 24 24">
+                              <path
+                                d="M12 16V4m0 0l-4 4m4-4l4 4"
+                                stroke="#a855f7"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <rect
+                                x="3"
+                                y="16"
+                                width="18"
+                                height="5"
+                                rx="2"
+                                fill="#f3e8ff"
+                              />
+                            </svg>
+                          </div>
+                          <span className="text-purple-700 font-semibold text-center">
+                            {file ? file.name : "Upload Receipt"}
+                          </span>
+                          <input
+                            id="file-upload"
+                            type="file"
+                            accept="image/*,.pdf"
+                            className="hidden"
+                            onChange={handleFileChange}
+                          />
+                        </label>
+                        {file && (
+                          <span className="text-xs text-gray-500 mt-2">
+                            {(file.size / 1024).toFixed(2)} KB
+                          </span>
+                        )}
+                        {file && (
+                          <button
+                            className="mt-4 px-4 py-2 bg-gray-200 rounded text-gray-700"
+                            onClick={handleRemoveFile}
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -680,15 +748,12 @@ const AddTransaction = () => {
                   />
                 </div>
                 {analyzeError && (
-                  <div className="text-red-500 text-sm mb-2">
-                    {analyzeError}
+                  <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 flex items-center gap-2">
+                    <span className="text-red-600">❌</span>
+                    <span className="text-sm font-medium">{analyzeError}</span>
                   </div>
                 )}
-                {uploadLoading && (
-                  <div className="text-blue-500 text-sm mb-2">
-                    Analyzing receipt...
-                  </div>
-                )}
+                
                 <button
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-200 to-pink-200 text-purple-800 font-semi-bold text-lg shadow-lg hover:from-purple-300 hover:to-pink-300 transform hover:scale-[1.02] transition-all duration-200 cursor-pointer disabled:bg-gray-400"
                   type="button"
@@ -703,11 +768,6 @@ const AddTransaction = () => {
                 >
                   {saving ? "Saving..." : "✓ Confirm & Save Transaction"}
                 </button>
-                {saveSuccess && (
-                  <div className="text-green-600 text-sm mt-2">
-                    {saveSuccess}
-                  </div>
-                )}
                   </div>
                 </div>
               </div>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import StatCard from "../utilities/StatCard";
-import { ArrowUpRight, ArrowDownRight, DollarSign } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -159,27 +158,8 @@ const Dashboard = () => {
   const pieData = piePeriod.categories || [];
   const pieLabel = pieView === "monthly" ? piePeriod.month : piePeriod.year;
 
-  // Stat card logic
-  const getStatChange = (data, key) => {
-    if (!data || data.length < 2) return null;
-    const prev = data[data.length - 2]?.[key] || 0;
-    const curr = data[data.length - 1]?.[key] || 0;
-    if (prev > 0) {
-      const change = (((curr - prev) / prev) * 100).toFixed(1);
-      return {
-        change: Math.abs(change),
-        isIncrease: curr > prev,
-        isDecrease: curr < prev,
-        show: true,
-      };
-    }
-    return { show: false };
-  };
-
-  const incomeChange = getStatChange(metrics.incomeExpenseData, "income");
-  const expenseChange = getStatChange(metrics.incomeExpenseData, "expense");
-  const netChange = getStatChange(metrics.yearlyIncomeExpenseData, "income");
-
+  // Stat card logic - simplified without percentage changes
+  
   // Get this month's data
   const thisMonthData = metrics.incomeExpenseData.at(-1) || {
     income: 0,
@@ -196,20 +176,6 @@ const Dashboard = () => {
       icon: "💵",
       bgColor: "bg-green-50",
       textColor: "text-green-900",
-      subText:
-        incomeChange && incomeChange.show
-          ? `${
-              incomeChange.isIncrease ? "▲" : incomeChange.isDecrease ? "▼" : ""
-            } ${incomeChange.change}% from last month`
-          : null,
-      subTextColor:
-        incomeChange && incomeChange.show
-          ? incomeChange.isIncrease
-            ? "text-green-500"
-            : incomeChange.isDecrease
-            ? "text-red-500"
-            : "text-gray-500"
-          : "text-gray-500",
     },
     {
       title: "Total Expenses",
@@ -217,24 +183,6 @@ const Dashboard = () => {
       icon: "🧾",
       bgColor: "bg-red-50",
       textColor: "text-red-700",
-      subText:
-        expenseChange && expenseChange.show
-          ? `${
-              expenseChange.isIncrease
-                ? "▲"
-                : expenseChange.isDecrease
-                ? "▼"
-                : ""
-            } ${expenseChange.change}% from last month`
-          : null,
-      subTextColor:
-        expenseChange && expenseChange.show
-          ? expenseChange.isIncrease
-            ? "text-red-500"
-            : expenseChange.isDecrease
-            ? "text-green-500"
-            : "text-gray-500"
-          : "text-gray-500",
     },
     {
       title: "Net Balance",
@@ -242,20 +190,6 @@ const Dashboard = () => {
       icon: "💼",
       bgColor: "bg-violet-50",
       textColor: "text-violet-900",
-      subText:
-        netChange && netChange.show
-          ? `${netChange.isIncrease ? "▲" : netChange.isDecrease ? "▼" : ""} ${
-              netChange.change
-            }% from last year`
-          : null,
-      subTextColor:
-        netChange && netChange.show
-          ? netChange.isIncrease
-            ? "text-blue-500"
-            : netChange.isDecrease
-            ? "text-red-500"
-            : "text-gray-500"
-          : "text-gray-500",
     },
   ];
 
