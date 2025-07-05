@@ -17,7 +17,6 @@ import {
   CartesianGrid,
 } from "recharts";
 import { getUserId } from "../utilities/auth.js";
-import { API_BASE_URL } from "../utilities/apiConfig";
 
 const pieColors = [
   "#a78bfa",
@@ -53,7 +52,9 @@ const Dashboard = () => {
 
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/transaction/dashboard-metrics`,
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/api/transaction/dashboard-metrics`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -406,18 +407,6 @@ const Dashboard = () => {
                     fill="#8884d8"
                     label={false}
                     activeIndex={activePieIndex}
-                    activeShape={(props) => (
-                      <g>
-                        <circle
-                          cx={props.cx}
-                          cy={props.cy}
-                          r={props.outerRadius + 6}
-                          fill={props.fill}
-                          stroke="#6366f1"
-                          strokeWidth={3}
-                        />
-                      </g>
-                    )}
                   >
                     {pieData.map((entry, idx) => (
                       <Cell

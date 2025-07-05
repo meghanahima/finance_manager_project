@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { analyzeReceiptWithGemini } from "../utilities/geminiAnalysis.js";
 import { getUserId } from "../utilities/auth.js";
-import { API_BASE_URL } from "../utilities/apiConfig";
 
 const expenseCategories = [
   { label: "Food & Dining", icon: "🍽️" },
@@ -167,7 +166,9 @@ const AddTransaction = () => {
         dateOfTransaction: manualForm.date,
       };
 
-      const addUrl = `${API_BASE_URL}/api/transaction/add-transaction`;
+      const addUrl = `${
+        import.meta.env.VITE_API_BASE_URL
+      }/api/transaction/add-transaction`;
       const response = await fetch(addUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -232,7 +233,9 @@ const AddTransaction = () => {
         dateOfTransaction: uploadForm.date,
       };
 
-      const addUrl = `${API_BASE_URL}/api/transaction/add-transaction`;
+      const addUrl = `${
+        import.meta.env.VITE_API_BASE_URL
+      }/api/transaction/add-transaction`;
       const response = await fetch(addUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -272,31 +275,31 @@ const AddTransaction = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8">
-      <h1 className="text-3xl font-bold mb-8 text-gray-800">
+      <h1 className="text-3xl font-bold mb-8 text-blue-950">
         Add New Transaction
       </h1>
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-8">
         {/* Tabs */}
-        <div className="flex mb-6">
+        <div className="flex mb-6 bg-gray-100 rounded-full p-1">
           <button
-            className={`flex-1 py-2 rounded-l-full ${
+            className={`flex-1 py-3 rounded-full font-semibold text-sm transition-all ${
               activeTab === "manual"
-                ? "bg-gradient-to-r from-blue-300 to-violet-400 text-black"
-                : "bg-gray-200 text-gray-700"
-            } font-semibold shadow focus:outline-none`}
+                ? "bg-gradient-to-r from-blue-500 to-violet-500 text-white shadow-lg transform scale-105"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
             onClick={() => setActiveTab("manual")}
           >
-            Manual Entry
+            ✏️ Manual Entry
           </button>
           <button
-            className={`flex-1 py-2 rounded-r-full ${
+            className={`flex-1 py-3 rounded-full font-semibold text-sm transition-all ${
               activeTab === "upload"
-                ? "bg-gradient-to-r from-violet-300 to-pink-300 text-black"
-                : "bg-gray-200 text-gray-700"
-            } font-semibold shadow focus:outline-none`}
+                ? "bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-lg transform scale-105"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
             onClick={() => setActiveTab("upload")}
           >
-            Upload Receipt
+            📷 Upload Receipt
           </button>
         </div>
 

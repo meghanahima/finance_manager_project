@@ -7,7 +7,6 @@ import Card, {
   CardTitle,
 } from "../utilities/card";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../utilities/apiConfig";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,8 +24,8 @@ const LoginPage = () => {
     setError("");
     setSuccess("");
     const url = isLogin
-      ? `${API_BASE_URL}/api/user/login`
-      : `${API_BASE_URL}/api/user/register`;
+      ? `${import.meta.env.VITE_API_BASE_URL}/api/user/login`
+      : `${import.meta.env.VITE_API_BASE_URL}/api/user/register`;
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -68,13 +67,14 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <div className="flex-1 flex flex-col justify-center items-center p-8">
-        <div className="flex justify-center items-center gap-3">
+    <div className="w-full min-h-screen flex flex-col lg:flex-row">
+      {/* Left/Form side */}
+      <div className="flex-1 flex flex-col justify-center items-center p-4 sm:p-8 bg-white lg:bg-white">
+        <div className="flex justify-center items-center gap-3 mb-2">
           <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-teal-400 to-teal-600">
             <BarChart3 className="w-7 h-7 text-white" />
           </div>
-          <h2 className="font-bold bg-gradient-to-r from-teal-600 to-teal-800 bg-clip-text text-transparent text-3xl">
+          <h2 className="font-bold bg-gradient-to-r from-teal-600 to-teal-800 bg-clip-text text-transparent text-2xl sm:text-3xl">
             FinanceAssistant
           </h2>
         </div>
@@ -85,13 +85,13 @@ const LoginPage = () => {
         </p>
 
         {/* Demo credentials section */}
-        <div className="mb-4 w-96 max-w-md mx-auto bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-          <div className="font-semibold text-yellow-800 mb-1">
+        <div className="mb-4 w-full max-w-md mx-auto bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 text-center">
+          <div className="font-semibold text-yellow-800 mb-1 text-base sm:text-lg">
             Try with demo credentials
           </div>
-          <div className="text-sm text-yellow-700 mb-2">
+          <div className="text-xs sm:text-sm text-yellow-700 mb-2">
             <div>
-              mail: <span className="font-mono">demo@gmail.com</span>
+              mail: <span className="font-mono break-all">demo@gmail.com</span>
             </div>
             <div>
               password: <span className="font-mono">demo</span>
@@ -99,7 +99,7 @@ const LoginPage = () => {
           </div>
           <button
             type="button"
-            className="px-4 py-1 bg-yellow-400 text-yellow-900 rounded hover:bg-yellow-500 font-medium text-sm"
+            className="px-3 py-1 bg-yellow-400 text-yellow-900 rounded hover:bg-yellow-500 font-medium text-xs sm:text-sm"
             onClick={() => {
               setEmail("demo@gmail.com");
               setPassword("demo");
@@ -109,7 +109,7 @@ const LoginPage = () => {
           </button>
         </div>
 
-        <Card className="border-teal-100 shadow-lg w-96 max-w-md">
+        <Card className="border-teal-100 shadow-lg w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-teal-800">
               {isLogin ? "Sign In" : "Create Account"}
@@ -217,7 +217,7 @@ const LoginPage = () => {
       </div>
 
       {/* right side */}
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-teal-400 via-teal-500 to-lime-500 flex items-center justify-center flex-col text-white p-8">
+      <div className="hidden lg:flex flex-1 min-h-screen bg-gradient-to-br from-teal-400 via-teal-500 to-lime-500 items-center justify-center flex-col text-white p-8">
         <div className="rounded-full w-24 h-24 flex items-center justify-center bg-white/20 mb-8">
           <BarChart3 className="text-5xl w-12 h-12" />
         </div>
@@ -246,3 +246,11 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
+<style jsx>{`
+  @media (max-width: 1023px) {
+    body {
+      background: linear-gradient(to bottom right, #14b8a6, #84cc16);
+    }
+  }
+`}</style>;

@@ -15,6 +15,25 @@ const addTransaction = async (req, res) => {
   } = req.body;
 
   try {
+    // Validate date if provided
+    if (dateOfTransaction) {
+      const transactionDate = new Date(dateOfTransaction);
+      if (isNaN(transactionDate.getTime())) {
+        return processRequest({ message: "Invalid date format" }, null, res);
+      }
+
+      // Check if date is in the future
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // Set to end of today
+      if (transactionDate > today) {
+        return processRequest(
+          { message: "Transaction date cannot be in the future" },
+          null,
+          res
+        );
+      }
+    }
+
     const newTransaction = await Transaction.create({
       userId,
       category,
@@ -39,25 +58,52 @@ const viewTransactions = async (req, res) => {
       return processRequest({ message: "UserId missing" }, null, res);
     // Convert userId to ObjectId if present
     matchCriteria.userId = new mongoose.Types.ObjectId(matchCriteria.userId);
-    console.log(matchCriteria.userId);
-    const result = await Transaction.aggregate([
-      { $match: matchCriteria },
-      {
-        $facet: {
-          data: [{ $skip: skip }, { $limit: limit }],
-          count: [{ $count: "total" }],
-        },
-      },
-    ]);
+    console.log("Fetching transactions for userId:", matchCriteria.userId);
 
-    const transactions = result[0].data;
-    const count = result[0].count[0]?.total || 0;
+    // Get total count first
+    const totalCount = await Transaction.countDocuments(matchCriteria);
+
+    // Get transactions with proper sorting
+    const transactions = await Transaction.find(matchCriteria)
+      .sort({ dateOfTransaction: -1, createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Use lean() for better performance
+
+    // Calculate totals for all filtered transactions (not just current page)
+    const allFilteredTransactions = await Transaction.find(matchCriteria)
+      .select("type amount")
+      .lean();
+
+    let totalIncome = 0;
+    let totalExpenses = 0;
+
+    allFilteredTransactions.forEach((t) => {
+      if (t.type === "Income") {
+        totalIncome += Number(t.amount);
+      } else if (t.type === "Expense") {
+        totalExpenses += Math.abs(Number(t.amount));
+      }
+    });
+
+    // Debug: Log first few transaction dates
+    console.log("First 5 transaction dates after sorting:");
+    transactions.slice(0, 5).forEach((t, index) => {
+      console.log(
+        `${index + 1}. ${t.dateOfTransaction} - ${t.type} - ₹${t.amount}`
+      );
+    });
 
     return processRequest(
       null,
       {
-        count: count,
+        count: totalCount,
         transactions: transactions,
+        totals: {
+          income: totalIncome,
+          expenses: totalExpenses,
+          netBalance: totalIncome - totalExpenses,
+        },
       },
       res
     );
@@ -395,8 +441,26 @@ const updateTransaction = async (req, res) => {
     if (type !== undefined) updateData.type = type;
     if (amount !== undefined) updateData.amount = amount;
     if (description !== undefined) updateData.description = description;
-    if (dateOfTransaction !== undefined)
+    if (dateOfTransaction !== undefined) {
+      // Validate date if provided
+      const transactionDate = new Date(dateOfTransaction);
+      if (isNaN(transactionDate.getTime())) {
+        return processRequest({ message: "Invalid date format" }, null, res);
+      }
+
+      // Check if date is in the future
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (transactionDate > today) {
+        return processRequest(
+          { message: "Transaction date cannot be in the future" },
+          null,
+          res
+        );
+      }
+
       updateData.dateOfTransaction = dateOfTransaction;
+    }
 
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       transactionObjId,
@@ -481,6 +545,18 @@ const importTransactions = async (req, res) => {
           dateOfTransaction = new Date(transaction.date);
           if (isNaN(dateOfTransaction.getTime())) {
             errors.push(`Transaction ${i + 1}: Invalid date format`);
+            continue;
+          }
+
+          // Check if date is in the future (more than today)
+          const today = new Date();
+          today.setHours(23, 59, 59, 999); // Set to end of today
+          if (dateOfTransaction > today) {
+            errors.push(
+              `Transaction ${i + 1}: Date cannot be in the future. Date: ${
+                transaction.date
+              }`
+            );
             continue;
           }
         }

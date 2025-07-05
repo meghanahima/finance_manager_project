@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { getUserId } from "../utilities/auth.js";
-import { API_BASE_URL } from "../utilities/apiConfig";
 
 const expenseCategories = [
   { label: "Food & Dining", value: "Food & Dining" },
@@ -351,16 +350,19 @@ const ImportTransactions = () => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/transaction/import`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId,
-          transactions: validRows,
-        }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/transaction/import`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            transactions: validRows,
+          }),
+        }
+      );
 
       const responseData = await response.json();
 
@@ -395,14 +397,16 @@ const ImportTransactions = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 text-blue-950">
+            Import Transactions 📊
+          </h1>
+          <p className="text-gray-600">
+            Upload your transaction data from Excel files with ease
+          </p>
+        </div>
+        
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex items-center mb-8">
-            <Upload className="h-8 w-8 text-teal-600 mr-3" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Import Transactions
-            </h1>
-          </div>
-
           {/* File Format Guide */}
           <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start">

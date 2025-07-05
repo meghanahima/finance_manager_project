@@ -6,7 +6,8 @@ const StatCard = ({
   icon,
   bgColor = "bg-white",
   textColor = "text-black",
-  subText = "",
+  label = "", // Period label like "This Month", "All Time", etc.
+  subText = "", // Additional info like percentage change
   subTextColor = "text-gray-400",
   children,
 }) => (
@@ -18,6 +19,11 @@ const StatCard = ({
         {title}
       </span>
       <span className={`text-2xl font-bold block ${textColor}`}>{value}</span>
+      {label && (
+        <span className="text-xs mt-1 text-gray-600 font-medium bg-gray-100 px-2 py-1 rounded-full inline-block">
+          {label}
+        </span>
+      )}
       {subText && (
         <span className={`block text-xs mt-1 ${subTextColor}`}>{subText}</span>
       )}

@@ -3,7 +3,6 @@ import { Edit, Trash2, HandCoins } from "lucide-react";
 import { ChevronDown, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import StatCard from "../utilities/StatCard";
 import { getUserId } from "../utilities/auth.js";
-import { API_BASE_URL } from "../utilities/apiConfig";
 
 const expenseCategories = [
   { label: "Food & Dining", icon: "🍽️" },
@@ -43,7 +42,7 @@ const CustomSelect = ({ value, onChange, children, ...props }) => (
     <select
       value={value}
       onChange={onChange}
-      className="w-full appearance-none px-4 py-2  outline-none border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition pr-10 bg-white text-gray-700"
+      className="w-full appearance-none px-4 py-2  outline-none border border-gray-300 rounded-lg focus:ring-1 focus:ring-teal-100 focus:border-teal-300 transition pr-10 bg-white text-gray-700"
       {...props}
     >
       {children}
@@ -72,7 +71,7 @@ const CustomCategorySelect = ({ value, onChange, typeFilter }) => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full appearance-none px-4 py-2 outline-none border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition pr-10 bg-white text-gray-700 text-left"
+        className="w-full appearance-none px-4 py-2 outline-none border border-gray-300 rounded-lg focus:ring-1 focus:ring-teal-100 focus:border-teal-600 transition pr-10 bg-white text-gray-700 text-left"
       >
         {getDisplayValue()}
       </button>
@@ -209,7 +208,9 @@ const Transactions = () => {
         if (endDate) matchCriteria.dateOfTransaction.$lte = endDate;
       }
       try {
-        const viewUrl = `${API_BASE_URL}/api/transaction/view-transactions`;
+        const viewUrl = `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/transaction/view-transactions`;
         const res = await fetch(viewUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -224,16 +225,12 @@ const Transactions = () => {
           throw new Error(data.message || "Failed to fetch transactions");
         setTransactions(data.data.transactions || []);
         setTotalCount(data.data.count || 0);
-        // Calculate totals
-        let income = 0,
-          expenses = 0;
-        (data.data.transactions || []).forEach((t) => {
-          if (t.type === "Income") income += Number(t.amount);
-          if (t.type === "Expense") expenses += Math.abs(Number(t.amount));
-        });
-        setTotalIncome(income);
-        setTotalExpenses(expenses);
-        setNetBalance(income - expenses);
+
+        // Use totals from backend (for all filtered transactions, not just current page)
+        const backendTotals = data.data.totals || {};
+        setTotalIncome(backendTotals.income || 0);
+        setTotalExpenses(backendTotals.expenses || 0);
+        setNetBalance(backendTotals.netBalance || 0);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -256,7 +253,9 @@ const Transactions = () => {
     }
 
     try {
-      const deleteUrl = `${API_BASE_URL}/api/transaction/delete-transaction`;
+      const deleteUrl = `${
+        import.meta.env.VITE_API_BASE_URL
+      }/api/transaction/delete-transaction`;
       const response = await fetch(deleteUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -291,7 +290,9 @@ const Transactions = () => {
     }
 
     try {
-      const updateUrl = `${API_BASE_URL}/api/transaction/update-transaction`;
+      const updateUrl = `${
+        import.meta.env.VITE_API_BASE_URL
+      }/api/transaction/update-transaction`;
       const response = await fetch(updateUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -322,13 +323,20 @@ const Transactions = () => {
 
   const totalPages = Math.ceil(totalCount / perPage);
 
+  // Calculate if filters are active
+  const hasActiveFilters =
+    typeFilter !== "All" || categoryFilter || startDate || endDate;
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8">
-      <div className="flex items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 mr-4">Transactions</h1>
-        <span className="text-xs text-gray-500 font-medium bg-gray-100 px-2 py-1 rounded">
-          Overall
-        </span>
+      {/* Header Section */}
+      <div className="w-full max-w-5xl mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2 text-blue-950">
+          Transaction Management 📊
+        </h1>
+        <p className="text-gray-600 mb-6">
+          View, filter, and manage all your transactions with ease
+        </p>
       </div>
       {/*Filters */}
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow p-6 mb-8">
@@ -375,34 +383,59 @@ const Transactions = () => {
           </div>
         </div>
       </div>
-      {/* <div className="w-full max-w-5xl border-t border-gray-200 mb-8"></div> */}
-      {/* Totals */}
-      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard
-          title="Total Income"
-          value={
-            totalIncome === 0 ? `₹ 0` : `₹ +${totalIncome.toLocaleString()}`
-          }
-          icon={typeIcons.Income}
-          bgColor="bg-green-50"
-          textColor="text-teal-900"
-        />
-        <StatCard
-          title="Total Expenses"
-          value={
-            totalExpenses === 0 ? `₹ 0` : `₹ -${totalExpenses.toLocaleString()}`
-          }
-          icon={typeIcons.Expense}
-          bgColor="bg-red-50"
-          textColor="text-red-800"
-        />
-        <StatCard
-          title="Net Balance"
-          value={`₹ ${netBalance.toLocaleString()}`}
-          icon={typeIcons.Balance}
-          bgColor="bg-violet-50"
-          textColor="text-violet-900"
-        />
+      
+      {/* Financial Summary Section */}
+      <div className="w-full max-w-5xl mb-8">
+        <div className="bg-white rounded-2xl shadow p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Financial Summary</h2>
+              <p className="text-sm text-gray-600">
+                {hasActiveFilters 
+                  ? "Totals based on your current filter selection"
+                  : "Totals for all your transactions"
+                }
+              </p>
+            </div>
+            <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              hasActiveFilters 
+                ? "bg-blue-100 text-blue-700" 
+                : "bg-gray-100 text-gray-700"
+            }`}>
+              {hasActiveFilters ? "Filtered Data" : "All Transactions"}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard
+              title="Total Income"
+              value={
+                totalIncome === 0 ? `₹ 0` : `₹ ${totalIncome.toLocaleString()}`
+              }
+              subText={hasActiveFilters ? "Based on filters applied" : "All time total"}
+              icon={typeIcons.Income}
+              bgColor="bg-green-50"
+              textColor="text-teal-900"
+            />
+            <StatCard
+              title="Total Expenses"
+              value={
+                totalExpenses === 0 ? `₹ 0` : `₹ ${totalExpenses.toLocaleString()}`
+              }
+              subText={hasActiveFilters ? "Based on filters applied" : "All time total"}
+              icon={typeIcons.Expense}
+              bgColor="bg-red-50"
+              textColor="text-red-800"
+            />
+            <StatCard
+              title="Net Balance"
+              value={`₹ ${netBalance.toLocaleString()}`}
+              subText={hasActiveFilters ? "Based on filters applied" : "All time balance"}
+              icon={typeIcons.Balance}
+              bgColor="bg-violet-50"
+              textColor="text-violet-900"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Transaction History Table */}
@@ -499,7 +532,27 @@ const Transactions = () => {
                 Previous
               </button>
             )}
-            <span>Page {page}</span>
+            {/* Page numbers logic */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => {
+                if (totalPages <= 3) return true;
+                if (page === 1) return p <= 3;
+                if (page === totalPages) return p >= totalPages - 2;
+                return Math.abs(p - page) <= 1;
+              })
+              .map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`px-3 py-1 rounded font-semibold border cursor-pointer ${
+                    p === page
+                      ? "bg-blue-500 text-white border-blue-500"
+                      : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
             {page < totalPages && (
               <button
                 onClick={() => setPage(page + 1)}
