@@ -7,13 +7,11 @@
 
 # Dependencies
 node_modules/
-*/node_modules/
 
 # Build outputs
 dist/
 build/
-*/dist/
-*/build/
+frontend/dist/
 
 # Logs
 *.log
@@ -23,12 +21,11 @@ yarn-error.log*
 lerna-debug.log*
 
 # Runtime data
-pids
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
+# Coverage directory
 coverage/
 *.lcov
 

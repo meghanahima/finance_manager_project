@@ -133,8 +133,12 @@ const Dashboard = () => {
           <div className="flex flex-col items-center justify-center py-16">
             <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mb-6"></div>
             <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Loading Dashboard...</h3>
-              <p className="text-gray-500">Please wait while we fetch your financial data</p>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                Loading Dashboard...
+              </h3>
+              <p className="text-gray-500">
+                Please wait while we fetch your financial data
+              </p>
             </div>
           </div>
         </div>
@@ -158,8 +162,8 @@ const Dashboard = () => {
   const pieData = piePeriod.categories || [];
   const pieLabel = pieView === "monthly" ? piePeriod.month : piePeriod.year;
 
-  // Stat card logic - simplified without percentage changes
-  
+  // Stat card logic
+
   // Get this month's data
   const thisMonthData = metrics.incomeExpenseData.at(-1) || {
     income: 0,
@@ -209,7 +213,6 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Enhanced Welcome Section */}
         <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 mb-6 lg:mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
-          {/* Subtle shine effects */}
           <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-20 -mt-20 blur-xl"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-16 -mb-16 blur-lg"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-radial from-white/10 to-transparent rounded-full blur-3xl"></div>
@@ -249,9 +252,12 @@ const Dashboard = () => {
             </div>
             <div className="text-right">
               {/* Month Display */}
-                  <div className="mt-4 inline-block bg-blue-400 text-white px-6 py-1 rounded-lg text-sm font-medium">
-                    {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </div>
+              <div className="mt-4 inline-block bg-blue-400 text-white px-6 py-1 rounded-lg text-sm font-medium">
+                {new Date().toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -357,6 +363,7 @@ const Dashboard = () => {
                 </div>
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-300 shadow-sm ${
                       pieView === "monthly"
                         ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg shadow-slate-200/50 transform scale-105"
@@ -370,6 +377,7 @@ const Dashboard = () => {
                     Monthly
                   </button>
                   <button
+                    type="button"
                     className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-300 shadow-sm ${
                       pieView === "yearly"
                         ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg shadow-slate-200/50 transform scale-105"

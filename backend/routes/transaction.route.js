@@ -4,7 +4,6 @@ const router = express.Router();
 const {
   addTransaction,
   viewTransactions,
-  analyzeReceipt,
   dashboardMetrics,
   deleteTransaction,
   updateTransaction,
@@ -13,7 +12,6 @@ const {
 
 router.post("/add-transaction", addTransaction);
 router.post("/view-transactions", viewTransactions);
-router.post("/analyze-receipt", analyzeReceipt);
 router.post("/dashboard-metrics", dashboardMetrics);
 router.post("/delete-transaction", deleteTransaction);
 router.post("/update-transaction", updateTransaction);

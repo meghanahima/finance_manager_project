@@ -26,10 +26,7 @@ const transactionSchema = new mongoose.Schema(
     dateOfTransaction: {
       type: Date,
       default: Date.now,
-    },
-    uploadedReceiptLink: {
-      type: String,
-    },
+    }
   },
   { timestamps: true }
 );

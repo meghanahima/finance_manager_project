@@ -11,7 +11,6 @@ const addTransaction = async (req, res) => {
     amount,
     description,
     dateOfTransaction,
-    // uploadedReceiptLink,
   } = req.body;
 
   try {
@@ -24,7 +23,7 @@ const addTransaction = async (req, res) => {
 
       // Check if date is in the future
       const today = new Date();
-      today.setHours(23, 59, 59, 999); // Set to end of today
+      today.setHours(23, 59, 59, 999);
       if (transactionDate > today) {
         return processRequest(
           { message: "Transaction date cannot be in the future" },
@@ -41,7 +40,6 @@ const addTransaction = async (req, res) => {
       amount,
       description: description || null,
       dateOfTransaction,
-      //   uploadedReceiptLink: uploadedReceiptLink || null,
     });
 
     return processRequest(null, newTransaction, res);
@@ -56,6 +54,7 @@ const viewTransactions = async (req, res) => {
   try {
     if (!matchCriteria.userId)
       return processRequest({ message: "UserId missing" }, null, res);
+    
     // Convert userId to ObjectId if present
     matchCriteria.userId = new mongoose.Types.ObjectId(matchCriteria.userId);
     console.log("Fetching transactions for userId:", matchCriteria.userId);
@@ -63,14 +62,14 @@ const viewTransactions = async (req, res) => {
     // Get total count first
     const totalCount = await Transaction.countDocuments(matchCriteria);
 
-    // Get transactions with proper sorting
+    // Get transactions with sorting on date
     const transactions = await Transaction.find(matchCriteria)
       .sort({ dateOfTransaction: -1, createdAt: -1, _id: -1 })
       .skip(skip)
       .limit(limit)
-      .lean(); // Use lean() for better performance
+      .lean();
 
-    // Calculate totals for all filtered transactions (not just current page)
+    // Calculate totals for all filtered transactions
     const allFilteredTransactions = await Transaction.find(matchCriteria)
       .select("type amount")
       .lean();
@@ -86,14 +85,6 @@ const viewTransactions = async (req, res) => {
       }
     });
 
-    // Debug: Log first few transaction dates
-    console.log("First 5 transaction dates after sorting:");
-    transactions.slice(0, 5).forEach((t, index) => {
-      console.log(
-        `${index + 1}. ${t.dateOfTransaction} - ${t.type} - ₹${t.amount}`
-      );
-    });
-
     return processRequest(
       null,
       {
@@ -107,77 +98,6 @@ const viewTransactions = async (req, res) => {
       },
       res
     );
-  } catch (err) {
-    console.log(err);
-    return processRequest(err, null, res);
-  }
-};
-
-const analyzeReceipt = async (req, res) => {
-  const { fileUrl } = req.body;
-  if (!fileUrl) {
-    return processRequest({ message: "fileUrl is required" }, null, res);
-  }
-  try {
-    // Download the file from Azure Blob Storage
-    const fileRes = await axios.get(fileUrl, { responseType: "arraybuffer" });
-    const fileBuffer = Buffer.from(fileRes.data, "binary");
-    // Prepare Gemini API request
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    const geminiUrl =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=" +
-      geminiApiKey;
-    // Gemini expects base64-encoded image/pdf
-    const base64 = fileBuffer.toString("base64");
-    // For images, use mime type image/png or image/jpeg; for pdf, application/pdf
-    const mimeType = fileUrl.endsWith(".pdf") ? "application/pdf" : "image/png";
-    const geminiPayload = {
-      contents: [
-        {
-          parts: [
-            {
-              inlineData: {
-                data: base64,
-                mimeType: mimeType,
-              },
-            },
-            {
-              text: "Extract the following fields from this receipt: date, amount, category, description. If this is not a receipt, reply with 'Document Not Found to be receipt'. Return a JSON object with these fields.",
-            },
-          ],
-        },
-      ],
-    };
-    const geminiRes = await axios.post(geminiUrl, geminiPayload);
-    // Try to parse the response
-    let extracted = null;
-    if (
-      geminiRes.data &&
-      geminiRes.data.candidates &&
-      geminiRes.data.candidates[0]?.content?.parts[0]?.text
-    ) {
-      const text = geminiRes.data.candidates[0].content.parts[0].text;
-      try {
-        extracted = JSON.parse(text);
-      } catch {
-        if (text.includes("Document Not Found to be receipt")) {
-          return processRequest(
-            null,
-            { message: "Document Not Found to be receipt" },
-            res
-          );
-        }
-        return processRequest(
-          { message: "Could not parse Gemini response" },
-          null,
-          res
-        );
-      }
-    }
-    if (!extracted) {
-      return processRequest({ message: "No data extracted" }, null, res);
-    }
-    return processRequest(null, extracted, res);
   } catch (err) {
     console.log(err);
     return processRequest(err, null, res);
@@ -609,7 +529,6 @@ const importTransactions = async (req, res) => {
 module.exports = {
   addTransaction,
   viewTransactions,
-  analyzeReceipt,
   dashboardMetrics,
   deleteTransaction,
   updateTransaction,

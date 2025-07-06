@@ -28,6 +28,7 @@ const AddTransaction = () => {
   const [activeTab, setActiveTab] = useState("manual");
   const [file, setFile] = useState(null);
 
+  // manual form
   const [manualForm, setManualForm] = useState({
     type: "Income",
     category: "",
@@ -35,6 +36,8 @@ const AddTransaction = () => {
     date: "",
     description: "",
   });
+
+  // receipt form 
   const [uploadForm, setUploadForm] = useState({
     type: "Income",
     category: "",
@@ -47,6 +50,7 @@ const AddTransaction = () => {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState("");
 
+  // setting to today's date by default
   useEffect(() => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -63,7 +67,6 @@ const AddTransaction = () => {
     setAnalyzeError("");
 
     try {
-      // Analyze receipt with Gemini AI directly
       const analysisResult = await analyzeReceiptWithGemini(file);
 
       if (!analysisResult.success) {
@@ -116,7 +119,7 @@ const AddTransaction = () => {
     }
 
     setFile(selectedFile);
-    setAnalyzeError(""); // Clear any previous errors
+    setAnalyzeError("");
 
     if (selectedFile) {
       analyzeReceipt(selectedFile);
@@ -334,7 +337,6 @@ const AddTransaction = () => {
       {/* Header Section */}
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 lg:mb-8">
         <div className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 mb-6 lg:mb-8 relative overflow-hidden border border-white/50 shadow-xl shadow-blue-100/20">
-          {/* Subtle shine effects */}
           <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-white/30 to-transparent rounded-full -mr-16 sm:-mr-20 -mt-16 sm:-mt-20 blur-xl"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-tr from-blue-200/20 to-transparent rounded-full -ml-12 sm:-ml-16 -mb-12 sm:-mb-16 blur-lg"></div>
 
@@ -358,6 +360,7 @@ const AddTransaction = () => {
           </div>
         </div>
       </div>
+      
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
           {/* Tabs */}

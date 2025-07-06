@@ -49,7 +49,6 @@ const Navbar = () => {
 
   return (
     <nav className="w-full bg-white shadow flex items-center px-4 sm:px-6 py-3 border-b border-gray-200 z-30 relative">
-      {/* Hamburger for mobile */}
       <button
         className="md:hidden mr-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
         onClick={() => setSidebarOpen(true)}

@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import "./App.css";
 import {
   BrowserRouter as Router,
   Routes,
@@ -37,7 +36,10 @@ function AppContent() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/addTransaction" element={<AddTransaction />} />
-            <Route path="/importTransactions" element={<ImportTransactions />} />
+            <Route
+              path="/importTransactions"
+              element={<ImportTransactions />}
+            />
             <Route path="/transactions" element={<Transactions />} />
           </Routes>
         </div>
