@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const expenseCategories = [
   "Food & Dining",
@@ -38,6 +38,18 @@ const EditTransactionModal = ({
       ? new Date(transaction.dateOfTransaction).toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0],
   }));
+
+  useEffect(() => {
+    setFormData({
+      type: transaction?.type || "Expense",
+      category: transaction?.category || "",
+      amount: transaction?.amount || "",
+      description: transaction?.description || "",
+      dateOfTransaction: transaction?.dateOfTransaction
+        ? new Date(transaction.dateOfTransaction).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+    });
+  }, [transaction]);
 
   if (!show || !transaction) return null;
 

@@ -40,6 +40,10 @@ const Transactions = () => {
   }, [typeFilter]);
 
   useEffect(() => {
+    setPage(1);
+  }, [typeFilter, categoryFilter, startDate, endDate]);
+
+  useEffect(() => {
     const fetchTransactions = async () => {
       setLoading(true);
       setError("");
