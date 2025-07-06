@@ -6,6 +6,41 @@ const saltRounds = 10;
 
 const register = async (req, res) => {
   let { mail, password } = req.body;
+  
+  // Input validation
+  if (!mail || !password) {
+    return processRequest(
+      {
+        message: "Email and password are required!",
+      },
+      null,
+      res
+    );
+  }
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(mail)) {
+    return processRequest(
+      {
+        message: "Please enter a valid email address!",
+      },
+      null,
+      res
+    );
+  }
+
+  // Password strength validation
+  if (password.length < 6) {
+    return processRequest(
+      {
+        message: "Password must be at least 6 characters long!",
+      },
+      null,
+      res
+    );
+  }
+
   try {
     // mail already exists
     const existingUser = await User.findOne({ mail });
@@ -36,15 +71,39 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const { mail, password } = req.body;
+  
+  // Input validation
+  if (!mail || !password) {
+    return processRequest(
+      {
+        message: "Email and password are required!",
+      },
+      null,
+      res
+    );
+  }
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(mail)) {
+    return processRequest(
+      {
+        message: "Please enter a valid email address!",
+      },
+      null,
+      res
+    );
+  }
+
   try {
     const user = await User.findOne({ mail });
 
     // matching password
     let isMatch = false;
     if (user) {
-      isMatch = bcrypt.compare(password, user.password);
+      isMatch = await bcrypt.compare(password, user.password);
     }
-    if (!isMatch)
+    if (!user || !isMatch)
       return processRequest({ message: "Wrong Credentials" }, null, res);
     
     return processRequest(null, user, res);

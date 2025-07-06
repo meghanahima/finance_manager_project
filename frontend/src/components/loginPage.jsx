@@ -16,13 +16,66 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
+
+  // Email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      return "Email is required";
+    }
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return "";
+  };
+
+  // Password validation function
+  const validatePassword = (password) => {
+    if (!password) {
+      return "Password is required";
+    }
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long";
+    }
+    return "";
+  };
+
+  // Real-time email validation
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    setEmailError(validateEmail(value));
+  };
+
+  // Real-time password validation
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+    setPasswordError(validatePassword(value));
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
+
+    // Validate inputs before sending
+    const emailValidationError = validateEmail(email);
+    const passwordValidationError = validatePassword(password);
+
+    setEmailError(emailValidationError);
+    setPasswordError(passwordValidationError);
+
+    // If there are validation errors, stop submission
+    if (emailValidationError || passwordValidationError) {
+      setLoading(false);
+      return;
+    }
+
     const url = isLogin
       ? `${import.meta.env.VITE_API_BASE_URL}/api/user/login`
       : `${import.meta.env.VITE_API_BASE_URL}/api/user/register`;
@@ -106,6 +159,8 @@ const LoginPage = () => {
             onClick={() => {
               setEmail("demo@gmail.com");
               setPassword("demo");
+              setEmailError("");
+              setPasswordError("");
             }}
           >
             Fill Demo Credentials
@@ -139,13 +194,18 @@ const LoginPage = () => {
                     type="email"
                     placeholder="Enter your email"
                     value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                    }}
+                    onChange={handleEmailChange}
                     required
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 focus:outline-none transition-colors"
+                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-200 focus:outline-none transition-colors ${
+                      emailError 
+                        ? "border-red-500 focus:border-red-500" 
+                        : "border-gray-300 focus:border-teal-500"
+                    }`}
                   />
                 </div>
+                {emailError && (
+                  <div className="text-red-500 text-sm mt-1">{emailError}</div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -162,11 +222,13 @@ const LoginPage = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                    }}
+                    onChange={handlePasswordChange}
                     required
-                    className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 focus:outline-none transition-colors"
+                    className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-teal-200 focus:outline-none transition-colors ${
+                      passwordError 
+                        ? "border-red-500 focus:border-red-500" 
+                        : "border-gray-300 focus:border-teal-500"
+                    }`}
                   />
                   <button
                     type="button"
@@ -176,6 +238,9 @@ const LoginPage = () => {
                     {showPassword ? <EyeOff className="" /> : <Eye />}
                   </button>
                 </div>
+                {passwordError && (
+                  <div className="text-red-500 text-sm mt-1">{passwordError}</div>
+                )}
               </div>
 
               {error && (
@@ -207,7 +272,13 @@ const LoginPage = () => {
                     : "Already have an account?"}
                   <button
                     type="button"
-                    onClick={() => setIsLogin(!isLogin)}
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                      setEmailError("");
+                      setPasswordError("");
+                      setError("");
+                      setSuccess("");
+                    }}
                     className="ml-1 text-teal-600 hover:text-teal-800 underline font-medium"
                   >
                     {isLogin ? "Sign up" : "Sign in"}
