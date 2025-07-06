@@ -150,7 +150,7 @@ const LoginPage = () => {
               mail: <span className="font-mono break-all">demo@gmail.com</span>
             </div>
             <div>
-              password: <span className="font-mono">demo</span>
+              password: <span className="font-mono">demopass</span>
             </div>
           </div>
           <button
@@ -158,7 +158,7 @@ const LoginPage = () => {
             className="px-3 py-1 bg-yellow-400 text-yellow-900 rounded hover:bg-yellow-500 font-medium text-xs sm:text-sm"
             onClick={() => {
               setEmail("demo@gmail.com");
-              setPassword("demo");
+              setPassword("demopass");
               setEmailError("");
               setPasswordError("");
             }}
