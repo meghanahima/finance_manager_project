@@ -11,6 +11,9 @@ connectToDB();
 
 app.use(cors());
 app.use(express.json());
+app.get("/', async (req, res) => {
+        return res.json({message: "server running"});
+});
 app.use("/api", router);
 
 
